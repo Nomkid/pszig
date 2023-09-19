@@ -3,8 +3,15 @@ const mem = std.mem;
 const io = std.io;
 const Self = @This();
 
-pub fn load(allocator: *mem.Allocator, reader: *io.Reader) !Self {
-    
+header: Header,
+index_table: IndexTable,
+key_table: KeyTable,
+data_table: DataTable,
+
+pub fn load(allocator: *mem.Allocator, reader: anytype) !Self {
+    _ = reader;
+    _ = allocator;
+    return Self{};
 }
 
 pub const Header = struct {
@@ -15,27 +22,32 @@ pub const Header = struct {
     num_entries: u32,
 };
 
-
 pub const IndexTable = struct {
     entries: []Entry,
 
     pub const Entry = struct {
-        key_offset: u32,
-        data_fmt:
+        key_offset: u16,
+        data_fmt: u16,
         data_len: u32,
         data_max_len: u32,
         data_offset: u32,
+
+        pub const DataFormat = .{
+            .utf8s = 0x0400, // UTF-8 Special, not null terminated
+            .utf8 = 0x0402, // UTF-8, null terminated
+            .int32 = 0x0404, // unsigned int32???
+        };
     };
 };
 
 pub const KeyTable = struct {
-    entries: []u8,
+    entries: []Entry,
 
     pub const Entry = []u8;
 };
 
 pub const DataTable = struct {
-    entries: []u8,
-    
+    entries: []Entry,
+
     pub const Entry = []u8;
 };

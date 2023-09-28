@@ -4,10 +4,33 @@ const mem = std.mem;
 const io = std.io;
 const fs = std.fs;
 
-pub fn loadAbsolute(path: []const u8, allocator: mem.Allocator) !SignedELF {
+pub fn loadAbsolute(path: []const u8, allocator: mem.Allocator) !void {
     _ = allocator;
-    const file = fs.openFileAbsolute(path, .{});
+    const file = try fs.openFileAbsolute(path, .{});
     defer file.close();
+    var reader = file.reader();
+
+    // Broken because of a bug preventing byteswap on enums
+    // Have to do it manually. oh well, more control I guess?
+    //   var header = try file.reader().readStructBig(cfile.PrimaryHeader);
+    //   std.debug.print("{any}\n", .{header});
+
+    var header: cfile.PrimaryHeader = undefined;
+    header.magic = try reader.readInt(u32, .Big);
+    header.version = try reader.readEnum(cfile.PrimaryHeader.Version, .Big);
+    header.attribute = try reader.readInt(u16, .Big);
+    header.category = try reader.readEnum(cfile.PrimaryHeader.Category, .Big);
+    header.extended_header_size = try reader.readInt(u32, .Big);
+    header.file_offset = try reader.readInt(u64, .Big);
+    header.file_size = try reader.readInt(u64, .Big);
+
+    std.debug.print("\n{any}\n", .{header});
+
+    // return SignedELF{};
+}
+
+test "load test file" {
+    try loadAbsolute("/home/jeeves/pszig/test/EBOOT.BIN", std.testing.allocator);
 }
 
 pub const SignedELF = packed struct {

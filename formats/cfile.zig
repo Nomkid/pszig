@@ -43,7 +43,7 @@ pub const EncryptionRootHeader = packed struct {
 
 pub const CertificationHeader = packed struct {
     sign_offset: u64,
-    sign_algorithm: u32,
+    sign_algorithm: SignAlgorithm,
     cert_entry_num: u32,
     attr_entry_num: u32,
     optional_header_size: u32,
@@ -110,7 +110,6 @@ pub const CertificationBody = packed struct {
             attribute = 3,
         };
     };
-
 };
 
 pub const Signature = packed union {
@@ -145,6 +144,29 @@ test "test" {
             .attr_entry_num = 0,
             .optional_header_size = 0,
             .padding = 0,
+        },
+        .certification_body = .{
+            .segment_certification_header = .{
+                .segment_offset = 0,
+                .segment_size = 0,
+                .segment_type = 0,
+                .segment_id = 0,
+                .sign_algorithm = 0,
+                .sign_idx = 0,
+                .enc_algorithm = 0,
+                .key_idx = 0,
+                .iv_idx = 0,
+                .comp_algorithm = 0,
+            },
+            .attributes = .{
+                .signature_type_3 = .{ .signature = 0 },
+            },
+            .optional_header_table = .{
+                .data_type = .attribute,
+                .data_size = 0,
+                .next = 0,
+                .data = .{ .attribute = 0 },
+            },
         },
         .signature = .{ .rsa2048 = 0 },
     };

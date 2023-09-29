@@ -35,8 +35,28 @@ pub fn loadAbsolute(path: []const u8, allocator: mem.Allocator) !void {
     extended_header.version_header_offset = try reader.readInt(u64, .Big);
     extended_header.supplemental_header_offset = try reader.readInt(u64, .Big);
     extended_header.supplemental_header_size = try reader.readInt(u64, .Big);
-    extended_header.padding = try reader.readInt(u64, .Big); // probably not necessary, we could just skipBytes
+    extended_header.padding = try reader.readInt(u64, .Big); // TODO: probably not necessary, we could just skipBytes
     std.debug.print("{any}\n", .{extended_header});
+
+    // TODO: maybe use readStructBig
+    var elf_header: SignedELF.ELFHeader = undefined;
+    elf_header.ident = try reader.readInt(u128, .Big);
+    elf_header.type = try reader.readInt(u16, .Big);
+    elf_header.machine = try reader.readInt(u16, .Big);
+    elf_header.version = try reader.readInt(u32, .Big);
+    elf_header.entry = try reader.readInt(u64, .Big);
+    elf_header.phoff = try reader.readInt(u64, .Big);
+    elf_header.shoff = try reader.readInt(u64, .Big);
+    elf_header.flags = try reader.readInt(u32, .Big);
+    elf_header.ehsize = try reader.readInt(u16, .Big);
+    elf_header.phentsize = try reader.readInt(u16, .Big);
+    elf_header.phnum = try reader.readInt(u16, .Big);
+    elf_header.shentsize = try reader.readInt(u16, .Big);
+    elf_header.shnum = try reader.readInt(u16, .Big);
+    elf_header.shstrndx = try reader.readInt(u16, .Big);
+    std.debug.print("{any}\n", .{elf_header});
+
+    std.debug.print("offset: {x}\n", .{try file.getPos()});
 
     // return SignedELF{};
 }
@@ -68,5 +88,22 @@ pub const SignedELF = packed struct {
             ps3 = 3,
             vita = 4,
         };
+    };
+
+    pub const ELFHeader = packed struct {
+        ident: u128, // ELF identification
+        type: u16, // object file type
+        machine: u16, // machine type
+        version: u32, // object file version
+        entry: u64, // entry point address
+        phoff: u64, // program header offset
+        shoff: u64, // section header offset
+        flags: u32, // processor-specific flags
+        ehsize: u16, // ELF header size
+        phentsize: u16, // size of program header entry
+        phnum: u16, // number of program header entries
+        shentsize: u16, // size of section header entry
+        shnum: u16, // number of section header entries
+        shstrndx: u16, // section name string table index
     };
 };

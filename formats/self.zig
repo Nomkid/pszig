@@ -23,8 +23,20 @@ pub fn loadAbsolute(path: []const u8, allocator: mem.Allocator) !void {
     header.extended_header_size = try reader.readInt(u32, .Big);
     header.file_offset = try reader.readInt(u64, .Big);
     header.file_size = try reader.readInt(u64, .Big);
-
     std.debug.print("\n{any}\n", .{header});
+
+    var extended_header: SignedELF.ExtendedHeader = undefined;
+    extended_header.extended_header_version = try reader.readEnum(SignedELF.ExtendedHeader.Version, .Big);
+    extended_header.program_indentification_header_offset = try reader.readInt(u64, .Big);
+    extended_header.elf_header_offset = try reader.readInt(u64, .Big);
+    extended_header.program_header_offset = try reader.readInt(u64, .Big);
+    extended_header.section_header_offset = try reader.readInt(u64, .Big);
+    extended_header.segment_extended_header_offset = try reader.readInt(u64, .Big);
+    extended_header.version_header_offset = try reader.readInt(u64, .Big);
+    extended_header.supplemental_header_offset = try reader.readInt(u64, .Big);
+    extended_header.supplemental_header_size = try reader.readInt(u64, .Big);
+    extended_header.padding = try reader.readInt(u64, .Big); // probably not necessary, we could just skipBytes
+    std.debug.print("{any}\n", .{extended_header});
 
     // return SignedELF{};
 }
@@ -41,7 +53,7 @@ pub const SignedELF = packed struct {
     certification_body: cfile.CertificationBody,
 
     pub const ExtendedHeader = packed struct {
-        extended_header_version: u64,
+        extended_header_version: Version,
         program_indentification_header_offset: u64,
         elf_header_offset: u64,
         program_header_offset: u64,
@@ -51,5 +63,10 @@ pub const SignedELF = packed struct {
         supplemental_header_offset: u64,
         supplemental_header_size: u64,
         padding: u64,
+
+        pub const Version = enum(u64) {
+            ps3 = 3,
+            vita = 4,
+        };
     };
 };

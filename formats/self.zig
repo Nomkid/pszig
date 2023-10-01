@@ -3,6 +3,7 @@ const cfile = @import("./cfile.zig");
 const mem = std.mem;
 const io = std.io;
 const fs = std.fs;
+const elf = std.elf;
 
 pub fn loadAbsolute(path: []const u8, allocator: mem.Allocator) !void {
     _ = allocator;
@@ -23,7 +24,7 @@ pub fn loadAbsolute(path: []const u8, allocator: mem.Allocator) !void {
     header.extended_header_size = try reader.readInt(u32, .Big);
     header.file_offset = try reader.readInt(u64, .Big);
     header.file_size = try reader.readInt(u64, .Big);
-    std.debug.print("\n{any}\n", .{header});
+    // std.debug.print("\n{any}\n", .{header});
 
     var extended_header: SignedELF.ExtendedHeader = undefined;
     extended_header.extended_header_version = try reader.readEnum(SignedELF.ExtendedHeader.Version, .Big);
@@ -36,24 +37,14 @@ pub fn loadAbsolute(path: []const u8, allocator: mem.Allocator) !void {
     extended_header.supplemental_header_offset = try reader.readInt(u64, .Big);
     extended_header.supplemental_header_size = try reader.readInt(u64, .Big);
     extended_header.padding = try reader.readInt(u64, .Big); // TODO: probably not necessary, we could just skipBytes
-    std.debug.print("{any}\n", .{extended_header});
+    // std.debug.print("{any}\n", .{extended_header});
 
-    // TODO: maybe use readStructBig
-    var elf_header: SignedELF.ELFHeader = undefined;
-    elf_header.ident = try reader.readInt(u128, .Big);
-    elf_header.type = try reader.readInt(u16, .Big);
-    elf_header.machine = try reader.readInt(u16, .Big);
-    elf_header.version = try reader.readInt(u32, .Big);
-    elf_header.entry = try reader.readInt(u64, .Big);
-    elf_header.phoff = try reader.readInt(u64, .Big);
-    elf_header.shoff = try reader.readInt(u64, .Big);
-    elf_header.flags = try reader.readInt(u32, .Big);
-    elf_header.ehsize = try reader.readInt(u16, .Big);
-    elf_header.phentsize = try reader.readInt(u16, .Big);
-    elf_header.phnum = try reader.readInt(u16, .Big);
-    elf_header.shentsize = try reader.readInt(u16, .Big);
-    elf_header.shnum = try reader.readInt(u16, .Big);
-    elf_header.shstrndx = try reader.readInt(u16, .Big);
+    var program_identification_header = try reader.readStructBig(SignedELF.ProgramIndentificationHeader);
+    _ = program_identification_header;
+
+    var header_buf: [@sizeOf(elf.Elf64_Ehdr)]u8 align(@alignOf(elf.Elf64_Ehdr)) = undefined;
+    try reader.readNoEof(&header_buf);
+    var elf_header = try elf.Header.parse(&header_buf);
     std.debug.print("{any}\n", .{elf_header});
 
     std.debug.print("offset: {x}\n", .{try file.getPos()});
@@ -90,20 +81,11 @@ pub const SignedELF = packed struct {
         };
     };
 
-    pub const ELFHeader = packed struct {
-        ident: u128, // ELF identification
-        type: u16, // object file type
-        machine: u16, // machine type
-        version: u32, // object file version
-        entry: u64, // entry point address
-        phoff: u64, // program header offset
-        shoff: u64, // section header offset
-        flags: u32, // processor-specific flags
-        ehsize: u16, // ELF header size
-        phentsize: u16, // size of program header entry
-        phnum: u16, // number of program header entries
-        shentsize: u16, // size of section header entry
-        shnum: u16, // number of section header entries
-        shstrndx: u16, // section name string table index
+    pub const ProgramIndentificationHeader = packed struct {
+        program_authority_id: u64,
+        program_vendor_id: u32,
+        program_type: u32,
+        program_sceversion: u64,
+        padding: u64,
     };
 };

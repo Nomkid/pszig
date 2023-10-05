@@ -1,9 +1,12 @@
 const std = @import("std");
+const psp = @import("./targets/psp/build-psp.zig");
+const ps3 = @import("./targets/ps3/build-ps3.zig");
 
-pub fn build(b: *std.Build) !void {
-    var exe = b.addExecutable(.{
-        .name = "",
-        .root_source_file = "",
-        .target = .{ .cpu_arch = .powerpc64 },
+pub fn build(b: *std.Build) void {
+    const test_self = ps3.addExecutableSelf(b, .{
+        .name = "test.elf",
+        .root_source_file = .{ .path = "test/test_self.zig" },
     });
+
+    b.installArtifact(test_self);
 }

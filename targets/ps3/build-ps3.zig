@@ -26,5 +26,6 @@ pub fn addExecutableSelf(b: *Build, options: SelfOptions) *Build.Step.Compile {
             // .cpu_model = .{ .explicit = &Target.powerpc.cpu.@"970" }, // TODO: verify.
             // .cpu_features_add = features,
         },
+        .single_threaded = true, // TODO: implement threads
     });
 }

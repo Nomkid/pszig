@@ -8,18 +8,36 @@ index_table: IndexTable,
 key_table: KeyTable,
 data_table: DataTable,
 
-pub fn load(allocator: *mem.Allocator, reader: anytype) !Self {
-    _ = reader;
+pub fn load(allocator: mem.Allocator, reader: io.AnyReader) !Self {
     _ = allocator;
-    return Self{};
+    var header = try reader.readStructBig(Header);
+    if (header.magic != Header.Magic) return error.InvalidMagic;
+    if (header.version != Header.Version) return error.InvalidVersion;
+
+    // var buf = try allocator.alloc(u8, 1000);
+    // defer allocator.free(buf);
+    // var read = try reader.readAll(buf);
+    // _ = read;
+
+    // std.debug.print("{s}\n", .{buf});
+
+    return Self{
+        .header = header,
+        .index_table = undefined,
+        .key_table = undefined,
+        .data_table = undefined,
+    };
 }
 
-pub const Header = struct {
-    magic: u32 = 0x00505346,
-    version: u32 = 0x01010000,
+pub const Header = packed struct {
+    magic: u32 = Magic,
+    version: u32 = Version,
     key_table_start: u32,
     data_table_start: u32,
     num_entries: u32,
+
+    pub const Magic = 0x00505346;
+    pub const Version = 0x01010000;
 };
 
 pub const IndexTable = struct {
@@ -51,3 +69,10 @@ pub const DataTable = struct {
 
     pub const Entry = []u8;
 };
+
+// test "load" {
+//     var file = try std.fs.cwd().openFile("test/NP00PKGI3/PARAM.SFO", .{});
+//     defer file.close();
+//     var loaded = try load(std.testing.allocator, file.reader().any());
+//     _ = loaded;
+// }

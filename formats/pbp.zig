@@ -13,7 +13,7 @@ pub fn loadFile(file: fs.File) !Self {
     if (try file.reader().readInt(u32, .big) != Magic) return error.InvalidMagic;
     if (try file.reader().readInt(u32, .big) != Version) return error.InvalidVersion;
 
-    var offsets = FileOffsetHeader{ .param_sfo = try file.reader().readInt(u32, .little) };
+    var param_sfo = try file.reader().readInt(u32, .little);
     var icon0_png = try file.reader().readInt(u32, .little);
     var icon1_pmf = try file.reader().readInt(u32, .little);
     var pic0_png = try file.reader().readInt(u32, .little);
@@ -22,26 +22,30 @@ pub fn loadFile(file: fs.File) !Self {
     var data_psp = try file.reader().readInt(u32, .little);
     var data_psar = try file.reader().readInt(u32, .little);
 
-    if (icon0_png != offsets.param_sfo) offsets.icon0_png = icon0_png;
-    if (icon1_pmf != pic0_png) offsets.icon1_pmf = icon1_pmf;
-    if (pic0_png != pic1_png) offsets.pic0_png = pic0_png;
-    if (pic1_png != snd0_at3) offsets.pic1_png = pic1_png;
-    if (snd0_at3 != data_psp) offsets.snd0_at3 = snd0_at3;
-    if (data_psp != data_psar) offsets.data_psp = data_psp;
-    if (data_psar != try file.getEndPos()) offsets.data_psar = data_psar;
-
+    const file_size = try file.getEndPos();
     return Self{
-        .offsets = offsets,
+        .offsets = FileOffsetHeader{
+            .param_sfo = .{ .len = icon0_png - param_sfo, .start = param_sfo },
+            .icon0_png = .{ .len = icon1_pmf - icon0_png, .start = if (icon0_png != param_sfo) icon0_png else null },
+            .icon1_pmf = .{ .len = pic0_png - icon1_pmf, .start = if (icon1_pmf != pic0_png) icon1_pmf else null },
+            .pic0_png = .{ .len = pic1_png - pic0_png, .start = if (pic0_png != pic1_png) pic0_png else null },
+            .pic1_png = .{ .len = pic1_png - pic1_png, .start = if (pic1_png != snd0_at3) pic1_png else null },
+            .snd0_at3 = .{ .len = pic1_png - snd0_at3, .start = if (snd0_at3 != data_psp) snd0_at3 else null },
+            .data_psp = .{ .len = pic1_png - data_psp, .start = if (data_psp != data_psar) data_psp else null },
+            .data_psar = .{ .len = @as(u32, @truncate(file_size)) - data_psar, .start = if (data_psar != file_size) data_psar else null },
+        },
     };
 }
 
 pub const FileOffsetHeader = struct {
-    param_sfo: u32,
-    icon0_png: ?u32 = null,
-    icon1_pmf: ?u32 = null,
-    pic0_png: ?u32 = null,
-    pic1_png: ?u32 = null,
-    snd0_at3: ?u32 = null,
-    data_psp: ?u32 = null,
-    data_psar: ?u32 = null,
+    param_sfo: Offset,
+    icon0_png: Offset,
+    icon1_pmf: Offset,
+    pic0_png: Offset,
+    pic1_png: Offset,
+    snd0_at3: Offset,
+    data_psp: Offset,
+    data_psar: Offset,
+
+    pub const Offset = struct { start: ?u32, len: u32 };
 };

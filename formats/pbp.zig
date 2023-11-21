@@ -29,9 +29,9 @@ pub fn loadFile(file: fs.File) !Self {
             .icon0_png = .{ .len = icon1_pmf - icon0_png, .start = if (icon0_png != param_sfo) icon0_png else null },
             .icon1_pmf = .{ .len = pic0_png - icon1_pmf, .start = if (icon1_pmf != pic0_png) icon1_pmf else null },
             .pic0_png = .{ .len = pic1_png - pic0_png, .start = if (pic0_png != pic1_png) pic0_png else null },
-            .pic1_png = .{ .len = pic1_png - pic1_png, .start = if (pic1_png != snd0_at3) pic1_png else null },
-            .snd0_at3 = .{ .len = pic1_png - snd0_at3, .start = if (snd0_at3 != data_psp) snd0_at3 else null },
-            .data_psp = .{ .len = pic1_png - data_psp, .start = if (data_psp != data_psar) data_psp else null },
+            .pic1_png = .{ .len = snd0_at3 - pic1_png, .start = if (pic1_png != snd0_at3) pic1_png else null },
+            .snd0_at3 = .{ .len = data_psp - snd0_at3, .start = if (snd0_at3 != data_psp) snd0_at3 else null },
+            .data_psp = .{ .len = data_psar - data_psp, .start = if (data_psp != data_psar) data_psp else null },
             .data_psar = .{ .len = @as(u32, @truncate(file_size)) - data_psar, .start = if (data_psar != file_size) data_psar else null },
         },
     };

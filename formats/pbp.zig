@@ -30,8 +30,6 @@ pub fn loadFile(file: fs.File) !Self {
     if (data_psp != data_psar) offsets.data_psp = data_psp;
     if (data_psar != try file.getEndPos()) offsets.data_psar = data_psar;
 
-    std.debug.print("{any}\n", .{offsets});
-
     return Self{
         .offsets = offsets,
     };

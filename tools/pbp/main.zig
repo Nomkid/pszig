@@ -33,7 +33,7 @@ pub fn unpack(argerator: *std.process.ArgIterator) !void {
 
         const parsed = try pbp.loadFile(file);
         const out_path = if (argerator.next()) |out| out else fs.path.basename(path);
-
+        std.debug.print("{any}\n", .{parsed});
         var dir = try fs.cwd().makeOpenPath(out_path, .{});
         defer dir.close();
 
@@ -52,16 +52,10 @@ fn writeLoop(in_file: *fs.File, offset: pbp.FileOffsetHeader.Offset, out_dir: *f
     if (offset.start) |o| try in_file.seekTo(@intCast(o)) else return;
     var out_file = try out_dir.createFile(out_path, .{});
     defer out_file.close();
-    var buf: [buf_size]u8 = undefined;
-    var idx: u32 = 0;
-    while (true) : (idx += buf_size) {
-        var read = try in_file.readAll(&buf);
-        if (idx >= offset.len) read = idx - offset.len;
-        if (read == buf_size)
-            try out_file.writeAll(&buf)
-        else {
-            try out_file.writeAll(buf[0..read]);
-            break;
-        }
+    var buf: [1]u8 = undefined;
+    var i: usize = 0;
+    while (i < offset.len) : (i += buf.len) {
+        _ = try in_file.read(&buf);
+        _ = try out_file.write(&buf);
     }
 }

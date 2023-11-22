@@ -1,123 +1,89 @@
 const std = @import("std");
 const mem = std.mem;
 const io = std.io;
+const fs = std.fs;
 const Self = @This();
 
-index_table: IndexTable,
-key_table: KeyTable,
-data_table: DataTable,
+entries: EntryList,
 
-allocator: mem.Allocator,
+pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
+    var entries = EntryList.init(allocator);
 
-pub fn load(allocator: mem.Allocator, reader: io.AnyReader) !Self {
-    if (try reader.readInt(u32, .big) != Magic) return error.InvalidMagic;
-    if (try reader.readInt(u32, .big) != Version) return error.InvalidVersion;
-    var key_table_start = try reader.readInt(u32, .little);
-    _ = key_table_start;
-    var data_table_start = try reader.readInt(u32, .little);
-    _ = data_table_start;
-    var num_entries = try reader.readInt(u32, .little);
-
-    var index_table_entries = std.ArrayList(IndexTable.Entry).init(allocator);
-    errdefer index_table_entries.deinit();
-    var key_table_entries = std.ArrayList(KeyTable.Entry).init(allocator);
-    errdefer key_table_entries.deinit();
-    var data_table_entries = std.ArrayList(DataTable.Entry).init(allocator);
-    errdefer data_table_entries.deinit();
-
+    const reader = in_file.reader().any();
+    if (try reader.readInt(u32, .little) != Magic) return error.InvalidMagic;
+    if (try reader.readInt(u32, .little) != Version) return error.InvalidVersion;
+    const key_table_start = try reader.readInt(u32, .little);
+    const data_table_start = try reader.readInt(u32, .little);
+    const num_entries = try reader.readInt(u32, .little);
+    var next_idx: usize = try in_file.getPos();
     var i: u32 = 0;
-    while (i < num_entries) : (i += 1)
-        try index_table_entries.append(.{
-            .key_offset = try reader.readInt(u16, .little),
-            .data_fmt = try reader.readEnum(DataFormat, .big),
-            .data_len = try reader.readInt(u32, .little),
-            .data_max_len = try reader.readInt(u32, .little),
-            .data_offset = try reader.readInt(u32, .little),
-        });
-    i = 0;
     while (i < num_entries) : (i += 1) {
-        var entry = try reader.readUntilDelimiterAlloc(allocator, 0, 128);
-        try key_table_entries.append(entry);
-    }
-    i = 0;
-    while (i < num_entries) : (i += 1) {
-        var index = index_table_entries.items[i];
-        try data_table_entries.append(switch (index.data_fmt) {
+        try in_file.seekTo(next_idx);
+        const key_offset = try reader.readInt(u16, .little) + key_table_start;
+        const data_fmt = try reader.readEnum(Entry.DataFormat, .big);
+        const data_len = try reader.readInt(u32, .little);
+        _ = data_len;
+        const data_max_len = try reader.readInt(u32, .little);
+        const data_offset = try reader.readInt(u32, .little) + data_table_start;
+        next_idx = try in_file.getPos();
+
+        try in_file.seekTo(@intCast(key_offset));
+        var key = try reader.readUntilDelimiterAlloc(allocator, 0, 128);
+        try in_file.seekTo(@intCast(data_offset));
+        var data: Entry.Data = switch (data_fmt) {
             .utf8s => blk: {
-                var buf = try allocator.alloc(u8, index.data_max_len);
+                var buf = try allocator.alloc(u8, data_max_len);
                 var read = try reader.readAll(buf);
                 break :blk .{ .utf8s = buf[0..read] };
             },
             .utf8 => blk: {
-                var buf = try allocator.alloc(u8, index.data_max_len);
+                var buf = try allocator.alloc(u8, data_max_len);
                 var read = try reader.readAll(buf);
                 break :blk .{ .utf8 = @ptrCast(buf[0..read]) };
             },
             .int32 => .{ .int32 = try reader.readInt(u32, .little) },
+        };
+
+        try entries.append(.{
+            .key = key,
+            .data_format = data_fmt,
+            .data = data,
         });
     }
-    for (key_table_entries.items, 0..) |item, index| std.debug.print("{s} = {any}\n", .{ item, data_table_entries.items[index] });
 
-    return Self{
-        .index_table = .{ .entries = try index_table_entries.toOwnedSlice() },
-        .key_table = .{ .entries = try key_table_entries.toOwnedSlice() },
-        .data_table = .{ .entries = try data_table_entries.toOwnedSlice() },
-        .allocator = allocator,
-    };
+    return Self{ .entries = entries };
 }
 
 pub fn deinit(self: *Self) void {
-    self.allocator.free(self.index_table.entries);
-    for (self.key_table.entries) |entry| self.allocator.free(entry);
-    self.allocator.free(self.key_table.entries);
-    for (self.data_table.entries) |entry| switch (entry) {
-        .utf8s => self.allocator.free(entry.utf8s),
-        .utf8 => self.allocator.free(@as([]u8, @ptrCast(entry.utf8))),
-        else => {},
-    };
-    self.allocator.free(self.data_table.entries);
+    for (self.entries.items) |item| {
+        self.entries.allocator.free(item.key);
+        switch (item.data_format) {
+            .utf8s => self.entries.allocator.free(item.data.utf8s),
+            .utf8 => self.entries.allocator.free(@as([]u8, @ptrCast(item.data.utf8))),
+            .int32 => {},
+        }
+    }
+    self.entries.deinit();
 }
 
-pub const Magic = 0x00505346;
-pub const Version = 0x01010000;
+pub const EntryList = std.ArrayList(Entry);
+pub const Entry = struct {
+    key: Key,
+    data_format: DataFormat,
+    data: Data,
 
-pub const IndexTable = struct {
-    entries: []Entry,
-
-    pub const Entry = struct {
-        key_offset: u16,
-        data_fmt: DataFormat,
-        data_len: u32,
-        data_max_len: u32,
-        data_offset: u32,
+    pub const Key = []u8;
+    pub const DataFormat = enum(u16) {
+        utf8s = 0x0400,
+        utf8 = 0x0402,
+        int32 = 0x0404,
     };
-};
-
-pub const DataFormat = enum(u16) {
-    utf8s = 0x0400, // UTF-8 Special, not null terminated
-    utf8 = 0x0402, // UTF-8, null terminated
-    int32 = 0x0404, // unsigned int32???
-};
-
-pub const KeyTable = struct {
-    entries: []Entry,
-
-    pub const Entry = []u8;
-};
-
-pub const DataTable = struct {
-    entries: []Entry,
-
-    pub const Entry = union(DataFormat) {
+    pub const Data = union(DataFormat) {
         utf8s: []u8,
         utf8: [:0]u8,
         int32: u32,
     };
 };
 
-test "load" {
-    var file = try std.fs.cwd().openFile("test/PKGI/EBOOT/PARAM.SFO", .{});
-    defer file.close();
-    var loaded = try load(std.testing.allocator, file.reader().any());
-    defer loaded.deinit();
-}
+pub const Magic = 0x46535000;
+pub const Version = 0x00000101;

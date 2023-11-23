@@ -8,6 +8,7 @@ entries: EntryList,
 
 pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
     var entries = EntryList.init(allocator);
+    errdefer entries.deinit();
 
     const reader = in_file.reader().any();
     if (try reader.readInt(u32, .little) != Magic) return error.InvalidMagic;
@@ -20,7 +21,7 @@ pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
     while (i < num_entries) : (i += 1) {
         try in_file.seekTo(next_idx);
         const key_offset = try reader.readInt(u16, .little) + key_table_start;
-        const data_fmt = try reader.readEnum(Entry.DataFormat, .big);
+        const data_fmt = try reader.readEnum(Entry.DataFormat, .little);
         const data_len = try reader.readInt(u32, .little);
         _ = data_len;
         const data_max_len = try reader.readInt(u32, .little);
@@ -28,7 +29,14 @@ pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
         next_idx = try in_file.getPos();
 
         try in_file.seekTo(@intCast(key_offset));
-        var key = try reader.readUntilDelimiterAlloc(allocator, 0, 128);
+        var key = std.ArrayList(u8).init(allocator);
+        errdefer key.deinit();
+        while (true) {
+            var byte = try reader.readByte();
+            try key.append(byte);
+            if (byte == 0) break;
+        }
+
         try in_file.seekTo(@intCast(data_offset));
         var data: Entry.Data = switch (data_fmt) {
             .utf8s => blk: {
@@ -45,7 +53,7 @@ pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
         };
 
         try entries.append(.{
-            .key = key,
+            .key = @ptrCast(try key.toOwnedSlice()),
             .data_format = data_fmt,
             .data = data,
         });
@@ -54,9 +62,76 @@ pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
     return Self{ .entries = entries };
 }
 
+pub fn writeFile(self: *Self, out_file: fs.File, allocator: mem.Allocator) !void {
+    var index_list = std.ArrayList(PackedIndexEntry).init(allocator);
+    defer index_list.deinit();
+    for (self.entries.items) |entry|
+        try index_list.append(.{
+            .key_offset = undefined,
+            .data_fmt = entry.data_format,
+            .data_len = undefined,
+            .data_max_len = undefined,
+            .data_offset = undefined,
+        });
+    var key_total_len: u16 = 0;
+    for (self.entries.items, 0..) |entry, idx| {
+        index_list.items[idx].key_offset = key_total_len;
+        key_total_len += @intCast(entry.key.len);
+    }
+    var data_total_len: u32 = 0;
+    for (self.entries.items, 0..) |entry, idx| {
+        index_list.items[idx].data_offset = data_total_len;
+        const max_len: u32 = switch (entry.data_format) {
+            .utf8 => @intCast(entry.data.utf8.len),
+            .utf8s => @intCast(entry.data.utf8s.len),
+            .int32 => 4,
+        };
+        index_list.items[idx].data_max_len = max_len;
+        index_list.items[idx].data_len = max_len;
+        data_total_len += max_len;
+    }
+
+    var bytes = std.ArrayList(u8).init(allocator);
+    errdefer bytes.deinit();
+    var padding: usize = undefined;
+    {
+        const writer = bytes.writer();
+        for (index_list.items) |item|
+            try writer.writeStruct(item);
+        // std.debug.print("{s}\n", .{std.fmt.fmtSliceHexUpper(mem.asBytes(&item))});
+        for (self.entries.items) |item|
+            try writer.writeAll(item.key);
+        padding = bytes.items.len % 4;
+        try writer.writeByteNTimes(0, padding);
+        for (self.entries.items) |item| switch (item.data_format) {
+            .utf8 => try writer.writeAll(item.data.utf8),
+            .utf8s => try writer.writeAll(item.data.utf8s),
+            .int32 => try writer.writeInt(u32, item.data.int32, .little),
+        };
+    }
+    {
+        const writer = out_file.writer();
+        const num_entries = self.entries.items.len;
+        const key_table_start = @sizeOf(PackedIndexEntry) * num_entries + @sizeOf(PackedHeader);
+        var header = PackedHeader{
+            .key_table_start = @intCast(key_table_start),
+            .data_table_start = @intCast(key_table_start + key_total_len - padding),
+            .num_entries = @intCast(num_entries),
+        };
+        var workaround = mem.toBytes(header);
+        try writer.writeAll((&workaround)[0 .. workaround.len - 4]);
+
+        var buffer = try bytes.toOwnedSlice();
+        // std.debug.print("{s}\n", .{std.fmt.fmtSliceHexUpper((&workaround)[0 .. workaround.len - 4])});
+        // std.debug.print("{s}\n", .{std.fmt.fmtSliceHexUpper(buffer)});
+        defer allocator.free(buffer);
+        try writer.writeAll(buffer);
+    }
+}
+
 pub fn deinit(self: *Self) void {
     for (self.entries.items) |item| {
-        self.entries.allocator.free(item.key);
+        self.entries.allocator.free(@as([]u8, @ptrCast(item.key)));
         switch (item.data_format) {
             .utf8s => self.entries.allocator.free(item.data.utf8s),
             .utf8 => self.entries.allocator.free(@as([]u8, @ptrCast(item.data.utf8))),
@@ -72,10 +147,10 @@ pub const Entry = struct {
     data_format: DataFormat,
     data: Data,
 
-    pub const Key = []u8;
+    pub const Key = [:0]u8;
     pub const DataFormat = enum(u16) {
-        utf8s = 0x0400,
-        utf8 = 0x0402,
+        utf8s = 0x0004,
+        utf8 = 0x0204,
         int32 = 0x0404,
     };
     pub const Data = union(DataFormat) {
@@ -87,3 +162,27 @@ pub const Entry = struct {
 
 pub const Magic = 0x46535000;
 pub const Version = 0x00000101;
+pub const PackedHeader = packed struct {
+    magic: u32 = Magic,
+    version: u32 = Version,
+    key_table_start: u32,
+    data_table_start: u32,
+    num_entries: u32,
+};
+pub const PackedIndexEntry = packed struct {
+    key_offset: u16,
+    data_fmt: Entry.DataFormat,
+    data_len: u32,
+    data_max_len: u32,
+    data_offset: u32,
+};
+
+test {
+    var in_file = try fs.cwd().openFile("test/PKGI/EBOOT/PARAM.SFO", .{});
+    defer in_file.close();
+    var out_file = try fs.cwd().createFile("test/PKGI/EBOOT/TEST.SFO", .{});
+    defer out_file.close();
+    var parsed = try loadFile(in_file, std.testing.allocator);
+    defer parsed.deinit();
+    try parsed.writeFile(out_file, std.testing.allocator);
+}

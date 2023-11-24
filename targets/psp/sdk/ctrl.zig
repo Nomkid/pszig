@@ -139,12 +139,12 @@ pub fn ctrlSetIdleCancelThreshold(idlereset: c_int, idleback: c_int) !i32 {
 
 // Get the idle threshold values.
 //
-// @param idlerest - Movement needed by the analog to reset the idle timer.
+// @param idlereset - Movement needed by the analog to reset the idle timer.
 // @param idleback - Movement needed by the analog to bring the PSP back from an idle state.
 //
 // @return < 0 on error.
-pub extern fn sceCtrlGetIdleCancelThreshold(idlerest: *c_int, idleback: *c_int) c_int;
-pub fn ctrlGetIdleCancelThreshold(idlerest: *c_int, idleback: *c_int) !i32 {
+pub extern fn sceCtrlGetIdleCancelThreshold(idlereset: *c_int, idleback: *c_int) c_int;
+pub fn ctrlGetIdleCancelThreshold(idlereset: *c_int, idleback: *c_int) !i32 {
     var res = sceCtrlGetIdleCancelThreshold(idlereset, idleback);
     if (res < 0) {
         return error.Unexpected;

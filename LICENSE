@@ -1,3 +1,60 @@
+The following license applies to all files EXCEPT those listed below.
+ - targets/psp/
+    - macros.zig
+    - os/
+        - bits.zig
+        - cwd.zig
+        - fdman.zig
+        - interrupt.s
+        - system.zig
+        - time.zig
+    - sdk/
+        - gu/
+            - gu.zig
+            - impl.zig
+            - types.zig
+        - gum/
+            - gum.zig
+            - impl.zig
+        - util/
+            - kerror.zig
+            - types.zig
+        - atrac3.zig
+        - audio.zig
+        - audiocodec.zig
+        - ctrl.zig
+        - display.zig
+        - dmac.zig
+        - ge.zig
+        - hprm.zig
+        - http.zig
+        - iofilemgr.zig
+        - jpeg.zig
+        - loadexec.zig
+        - modulemgr.zig
+        - mp3.zig
+        - mpeg.zig
+        - net.zig
+        - openpsid.zig
+        - power.zig
+        - reg.zig
+        - rtc.zig
+        - ssl.zig
+        - stdio.zig
+        - sysmem.zig
+        - threadman.zig
+        - umd.zig
+        - usb.zig
+        - utility.zig
+        - utils.zig
+        - wlan.zig
+    - utils/
+        - allocator.zig
+        - module.zig
+        - utils.zig
+These files include their respective licenses at the end of the files themselves.
+
+
 MIT License
 
 Copyright (c) 2023 Gabriel Keess

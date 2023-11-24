@@ -17,9 +17,9 @@ usingnamespace @import("util/types.zig");
 // @param n - The size of data
 //
 // @return 0 on success; otherwise an error code
-pub extern fn sceDmacMemcpy(dst: *c_void, src: *const c_void, n: SceSize) c_int;
+pub extern fn sceDmacMemcpy(dst: *anyopaque, src: *const anyopaque, n: SceSize) c_int;
 
-pub extern fn sceDmacTryMemcpy(dst: *c_void, src: *const c_void, n: SceSize) c_int;
+pub extern fn sceDmacTryMemcpy(dst: *anyopaque, src: *const anyopaque, n: SceSize) c_int;
 
 // MIT License
 //

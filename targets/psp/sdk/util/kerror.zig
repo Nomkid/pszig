@@ -1,6 +1,6 @@
 // License details can be found at the bottom of this file.
 
-pub const PspKernelErrorCodes = extern enum(c_int) {
+pub const PspKernelErrorCodes = enum(c_int) {
     Ok = 0,
     Error = 2147614721,
     Notimp = 2147614722,

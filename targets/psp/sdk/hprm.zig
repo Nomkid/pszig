@@ -15,7 +15,7 @@ comptime {
     asm (macro.import_function("sceHprm", "0x40D2F9F0", "sceHprmReadLatch"));
 }
 
-pub const PspHprmKeys = extern enum(u8) {
+pub const PspHprmKeys = enum(u8) {
     Playpause = 1,
     Forward = 4,
     Back = 8,

@@ -34,7 +34,7 @@ comptime {
 }
 
 usingnamespace @import("util/types.zig");
-test "" {
+test {
     @import("std").meta.refAllDecls(@This());
 }
 
@@ -67,73 +67,30 @@ fn intToError(res: c_int) !void {
     @setRuntimeSafety(false);
     if (res < 0) {
         var translated = @as(u32, @bitCast(res));
+        _ = translated;
         switch (@as(AtracError, @enumFromInt(res))) {
-            ParamFail => {
-                return error.ParamFail;
-            },
-            ApiFail => {
-                return error.ApiFail;
-            },
-            NoAtracid => {
-                return error.NoAtracid;
-            },
-            BadCodectype => {
-                return error.BadCodectype;
-            },
-            BadAtracid => {
-                return error.BadAtracid;
-            },
-            UnknownFormat => {
-                return error.UnknownFormat;
-            },
-            UnmatchFormat => {
-                return error.UnmatchFormat;
-            },
-            BadData => {
-                return error.BadData;
-            },
-            AlldataIsOnmemory => {
-                return error.AlldataIsOnmemory;
-            },
-            UnsetData => {
-                return error.UnsetData;
-            },
-            ReadSizeIsTooSmall => {
-                return error.ReadSizeIsTooSmall;
-            },
-            NeedSecondBuffer => {
-                return error.NeedSecondBuffer;
-            },
-            ReadSizeOverBuffer => {
-                return error.ReadSizeOverBuffer;
-            },
-            Not4byteAlignment => {
-                return error.Not4byteAlignment;
-            },
-            BadSample => {
-                return error.BadSample;
-            },
-            WriteByteFirstBuffer => {
-                return error.WriteByteFirstBuffer;
-            },
-            WriteByteSecondBuffer => {
-                return error.WriteByteSecondBuffer;
-            },
-            AddDataIsTooBig => {
-                return error.AddDataIsTooBig;
-            },
-            UnsetParam => {
-                return error.UnsetParam;
-            },
-            NoNeedSecondBuffer => {
-                return error.NoNeedSecondBuffer;
-            },
-            NoDataInBuffer => {
-                return error.NoDataInBuffer;
-            },
-            AllDataWasDecoded => {
-                return error.AllDataWasDecoded;
-            },
+            .ParamFail => return error.ParamFail,
+            .ApiFail => return error.ApiFail,
+            .NoAtracid => return error.NoAtracid,
+            .BadCodectype => return error.BadCodectype,
+            .BadAtracid => return error.BadAtracid,
+            .UnknownFormat => return error.UnknownFormat,
+            .UnmatchFormat => return error.UnmatchFormat,
+            .BadData => return error.BadData,
+            .AlldataIsOnmemory => return error.AlldataIsOnmemory,
+            .UnsetData => return error.UnsetData,
+            .ReadSizeIsTooSmall => return error.ReadSizeIsTooSmall,
+            .NeedSecondBuffer => return error.NeedSecondBuffer,
+            .ReadSizeOverBuffer => return error.ReadSizeOverBuffer,
+            .Not4byteAlignment => return error.Not4byteAlignment,
+            .BadSample => return error.BadSample,
+            .WriteByteFirstBuffer => return error.WriteByteFirstBuffer,
+            .WriteByteSecondBuffer => return error.WriteByteSecondBuffer,
+            .AddDataIsTooBig => return error.AddDataIsTooBig,
+            .UnsetParam => return error.UnsetParam,
+            .NoNeedSecondBuffer => return error.NoNeedSecondBuffer,
+            .NoDataInBuffer => return error.NoDataInBuffer,
+            .AllDataWasDecoded => return error.AllDataWasDecoded,
         }
     }
 }
@@ -172,9 +129,9 @@ pub fn atracGetAtracID(uiCodecType: AtracCodecType) !i32 {
 // @param bufsize - the size of the buffer pointed by buf
 //
 // @return the new atrac ID, or < 0 on error
-pub extern fn sceAtracSetDataAndGetID(buf: ?*c_void, bufsize: SceSize) c_int;
+pub extern fn sceAtracSetDataAndGetID(buf: ?*anyopaque, bufsize: SceSize) c_int;
 
-pub fn atracSetDataAndGetID(buf: *c_void, bufSize: usize) !u32 {
+pub fn atracSetDataAndGetID(buf: *anyopaque, bufSize: usize) !u32 {
     var res = sceAtracSetDataAndGetID(buf, bufSize);
     try intToError(res);
     return res;

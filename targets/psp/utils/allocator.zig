@@ -5,9 +5,9 @@ const mem = std.mem;
 const debug = std.debug;
 const assert = debug.assert;
 
-usingnamespace @import("../include/psptypes.zig");
-usingnamespace @import("../include/pspsysmem.zig");
-usingnamespace @import("../include/psploadexec.zig");
+usingnamespace @import("../sdk/util/types.zig");
+usingnamespace @import("../sdk/sysmem.zig");
+usingnamespace @import("../sdk/loadexec.zig");
 
 const Allocator = mem.Allocator;
 

@@ -1,8 +1,8 @@
 // License details can be found at the bottom of this file.
 
-usingnamespace @import("../include/pspthreadman.zig");
-usingnamespace @import("../include/psploadexec.zig");
-usingnamespace @import("../include/psptypes.zig");
+usingnamespace @import("../sdk/threadman.zig");
+usingnamespace @import("../sdk/loadexec.zig");
+usingnamespace @import("../sdk/util/types.zig");
 
 var requestedExit: bool = false;
 
@@ -12,14 +12,14 @@ pub fn isRunning() bool {
 }
 
 //Exit
-export fn exitCB(arg1: c_int, arg2: c_int, common: ?*c_void) c_int {
+export fn exitCB(arg1: c_int, arg2: c_int, common: ?*anyopaque) c_int {
     requestedExit = true;
     sceKernelExitGame();
     return 0;
 }
 
 //Thread for home button exit thread.
-export fn cbThread(args: SceSize, argp: ?*c_void) c_int {
+export fn cbThread(args: SceSize, argp: ?*anyopaque) c_int {
     var cbID: i32 = -1;
 
     cbID = sceKernelCreateCallback("zig_exit_callback", exitCB, null);

@@ -7,13 +7,14 @@ pub var errno: u32 = 0;
 
 fn pspErrToErrno(code: u64) i32 {
     if ((code & 0x80010000) == 0x80010000) {
-        errno = @truncate(u32, code & 0xFFFF);
+        errno = @as(u32, @truncate(code & 0xFFFF));
         return -1;
     }
-    return @bitCast(i32, @truncate(u32, code));
+    return @as(i32, @bitCast(@as(u32, @truncate(code))));
 }
 
 pub fn getErrno(r: c_int) usize {
+    _ = r;
     return errno;
 }
 
@@ -29,7 +30,7 @@ pub fn read(fd: fd_t, ptr: [*]u8, len: usize) i32 {
 
     switch (__psp_descriptormap[fd].?.ftype) {
         .File, .Tty => {
-            return pspErrToErrno(@bitCast(u32, sceIoRead(__psp_descriptormap[fd].?.sce_descriptor, ptr, len)));
+            return pspErrToErrno(@as(u32, @bitCast(sceIoRead(__psp_descriptormap[fd].?.sce_descriptor, ptr, len))));
         },
 
         else => {
@@ -52,7 +53,7 @@ pub fn write(fd: fd_t, ptr: [*]const u8, len: usize) i32 {
 
     switch (__psp_descriptormap[fd].?.ftype) {
         .File, .Tty => {
-            return pspErrToErrno(@bitCast(u32, sceIoWrite(__psp_descriptormap[fd].?.sce_descriptor, ptr, len)));
+            return pspErrToErrno(@as(u32, @bitCast(sceIoWrite(__psp_descriptormap[fd].?.sce_descriptor, ptr, len))));
         },
 
         else => {
@@ -64,14 +65,14 @@ pub fn write(fd: fd_t, ptr: [*]const u8, len: usize) i32 {
     return -1;
 }
 
-pub fn __pspOsInit(arg: ?*c_void) void {
+pub fn __pspOsInit(arg: ?*anyopaque) void {
     __psp_fdman_init();
     __psp_init_cwd(arg);
 }
 
 usingnamespace @import("../include/pspthreadman.zig");
 pub fn nanosleep(req: *const timespec, rem: ?*timespec) c_int {
-    _ = sceKernelDelayThread(@intCast(c_uint, 1000 * 1000 * req.tv_sec + @divTrunc(req.tv_nsec, 1000)));
+    _ = sceKernelDelayThread(@as(c_uint, @intCast(1000 * 1000 * req.tv_sec + @divTrunc(req.tv_nsec, 1000))));
     return 0;
 }
 
@@ -100,14 +101,14 @@ pub fn openat(dir: fd_t, path: [*:0]const u8, flags: u32, mode: u32) c_int {
             return -1;
         }
 
-        scefd = sceIoOpen(dest[0..], @bitCast(c_int, flags), mode);
+        scefd = sceIoOpen(dest[0..], @as(c_int, @bitCast(flags)), mode);
         if (scefd >= 0) {
             fd = __psp_fdman_get_new_descriptor();
             if (fd != -1) {
-                __psp_descriptormap[@intCast(usize, fd)].?.sce_descriptor = scefd;
-                __psp_descriptormap[@intCast(usize, fd)].?.ftype = __psp_fdman_type.File;
-                __psp_descriptormap[@intCast(usize, fd)].?.flags = flags;
-                __psp_descriptormap[@intCast(usize, fd)].?.filename = dest[0..];
+                __psp_descriptormap[@as(usize, @intCast(fd))].?.sce_descriptor = scefd;
+                __psp_descriptormap[@as(usize, @intCast(fd))].?.ftype = __psp_fdman_type.File;
+                __psp_descriptormap[@as(usize, @intCast(fd))].?.flags = flags;
+                __psp_descriptormap[@as(usize, @intCast(fd))].?.filename = dest[0..];
                 return fd;
             } else {
                 _ = sceIoClose(scefd);
@@ -115,7 +116,7 @@ pub fn openat(dir: fd_t, path: [*:0]const u8, flags: u32, mode: u32) c_int {
                 return -1;
             }
         } else {
-            return pspErrToErrno(@bitCast(u32, scefd));
+            return pspErrToErrno(@as(u32, @bitCast(scefd)));
         }
 
         errno = EBADF;
@@ -134,7 +135,7 @@ pub fn close(fd: fd_t) c_int {
     switch (__psp_descriptormap[fd].?.ftype) {
         .File, .Tty => {
             if (__psp_descriptormap[fd].?.ref_count == 1) {
-                ret = pspErrToErrno(@bitCast(u32, sceIoClose(__psp_descriptormap[fd].?.sce_descriptor)));
+                ret = pspErrToErrno(@as(u32, @bitCast(sceIoClose(__psp_descriptormap[fd].?.sce_descriptor))));
             }
             __psp_fdman_release_descriptor(fd);
             return ret;
@@ -165,10 +166,10 @@ pub fn unlinkat(dir: fd_t, path: [*:0]const u8, flags: u32) c_int {
     var fdStat: SceIoStat = undefined;
     _ = sceIoGetstat(dest[0..], &fdStat);
 
-    if (fdStat.st_mode & @enumToInt(IOAccessModes.FIO_S_IFDIR) != 0) {
-        return pspErrToErrno(@bitCast(u32, sceIoRmdir(dest[0..])));
+    if (fdStat.st_mode & @intFromEnum(IOAccessModes.FIO_S_IFDIR) != 0) {
+        return pspErrToErrno(@as(u32, @bitCast(sceIoRmdir(dest[0..]))));
     } else {
-        return pspErrToErrno(@bitCast(u32, sceIoRemove(dest[0..])));
+        return pspErrToErrno(@as(u32, @bitCast(sceIoRemove(dest[0..]))));
     }
 }
 
@@ -184,7 +185,7 @@ pub fn mkdirat(dir: fd_t, path: [*:0]const u8, mode: u32) c_int {
         return -1;
     }
 
-    return pspErrToErrno(@bitCast(u32, sceIoMkdir(dest[0..], mode)));
+    return pspErrToErrno(@as(u32, @bitCast(sceIoMkdir(dest[0..], mode))));
 }
 
 pub fn fstat(fd: fd_t, stat: *Stat) c_int {
@@ -192,21 +193,21 @@ pub fn fstat(fd: fd_t, stat: *Stat) c_int {
     var dest: [PATH_MAX + 1]u8 = undefined;
     var ret: i32 = 0;
 
-    var status = __psp_path_absolute(@ptrCast([*]const u8, &__psp_descriptormap[fd].?.filename.?), dest[0..], PATH_MAX);
+    var status = __psp_path_absolute(@as([*]const u8, @ptrCast(&__psp_descriptormap[fd].?.filename.?)), dest[0..], PATH_MAX);
     if (status < 0) {
         errno = ENAMETOOLONG;
         return -1;
     }
 
-    @memset(@ptrCast([*]u8, stat), 0, @sizeOf(Stat));
+    @memset(@as([*]u8, @ptrCast(stat)), 0, @sizeOf(Stat));
     ret = sceIoGetstat(dest[0..], &psp_stat);
     if (ret < 0) {
-        return pspErrToErrno(@bitCast(u32, ret));
+        return pspErrToErrno(@as(u32, @bitCast(ret)));
     }
 
-    stat.mode = @bitCast(u32, psp_stat.st_mode);
+    stat.mode = @as(u32, @bitCast(psp_stat.st_mode));
     stat.st_attr = @as(u64, psp_stat.st_attr);
-    stat.size = @bitCast(u64, psp_stat.st_size);
+    stat.size = @as(u64, @bitCast(psp_stat.st_size));
     stat.st_ctime = psp_stat.st_ctime;
     stat.st_atime = psp_stat.st_atime;
     stat.st_mtime = psp_stat.st_mtime;
@@ -230,7 +231,7 @@ pub fn faccessat(dir: fd_t, path: [*:0]const u8, mode: u32, flags: u32) c_int {
     var fdStat: SceIoStat = undefined;
     var v = sceIoGetstat(dest[0..], &fdStat);
     if (v != 0) {
-        return pspErrToErrno(@bitCast(u32, v));
+        return pspErrToErrno(@as(u32, @bitCast(v)));
     }
 
     if (fdStat.st_mode & S_IFDIR != 0) {
@@ -254,7 +255,7 @@ pub fn lseek(fd: fd_t, off: i64, whence: c_int) c_int {
         .File => {
             std.debug.warn("{}", .{whence});
             //If you need to seek past 4GB, you have a real problem.
-            return pspErrToErrno(@bitCast(u32, sceIoLseek32(__psp_descriptormap[fd].?.sce_descriptor, @truncate(c_int, off), whence)));
+            return pspErrToErrno(@as(u32, @bitCast(sceIoLseek32(__psp_descriptormap[fd].?.sce_descriptor, @as(c_int, @truncate(off)), whence))));
         },
 
         else => {
@@ -270,7 +271,7 @@ pub fn isatty(fd: fd_t) c_int {
         return -1;
     }
 
-    return @intCast(c_int, @boolToInt(__psp_fdman_fdType(fd, __psp_fdman_type.Tty)));
+    return @as(c_int, @intCast(@intFromBool(__psp_fdman_fdType(fd, __psp_fdman_type.Tty))));
 }
 
 // MIT License

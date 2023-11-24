@@ -52,8 +52,8 @@ pub const SceFloat32 = f32;
 pub const SceWChar16 = c_ushort;
 pub const SceWChar32 = c_uint;
 pub const SceBool = c_int;
-pub const SceVoid = c_void;
-pub const ScePVoid = ?*c_void;
+pub const SceVoid = anyopaque;
+pub const ScePVoid = ?*anyopaque;
 pub const ScePspSRect = extern struct {
     x: c_short,
     y: c_short,

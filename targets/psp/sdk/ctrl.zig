@@ -47,7 +47,7 @@ pub const PspCtrlButtons = extern enum(c_uint) {
     Ms = 33554432,
 };
 
-pub const PspCtrlMode = extern enum(c_int) {
+pub const PspCtrlMode = enum(c_int) {
     Digital = 0,
     Analog = 1,
 };

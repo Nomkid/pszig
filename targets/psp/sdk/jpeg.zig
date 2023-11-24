@@ -65,7 +65,7 @@ pub fn jpegDeleteMJpeg() bool {
 // @param unk - Unknown, pass 0
 //
 // @return (width * 65536) + height on success, < 0 on error
-pub extern fn sceJpegDecodeMJpeg(jpegbuf: []u8, size: SceSize, rgba: ?*c_void, unk: u32) c_int;
+pub extern fn sceJpegDecodeMJpeg(jpegbuf: []u8, size: SceSize, rgba: ?*anyopaque, unk: u32) c_int;
 
 // MIT License
 //

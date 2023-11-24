@@ -32,7 +32,7 @@ comptime {
     asm (macro.import_function("sceAudio", "0x63F2889C", "sceAudioOutput2ChangeLength"));
     asm (macro.import_function("sceAudio", "0x647CEF33", "sceAudioOutput2GetRestSample"));
 }
-pub const PspAudioFormats = extern enum(c_int) {
+pub const PspAudioFormats = enum(c_int) {
     Stereo = 0,
     Mono = 16,
     _,
@@ -75,7 +75,7 @@ pub extern fn sceAudioChRelease(channel: c_int) c_int;
 // @param buf - Pointer to the PCM data to output.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioOutput(channel: c_int, vol: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioOutput(channel: c_int, vol: c_int, buf: ?*anyopaque) c_int;
 
 // Output audio of the specified channel (blocking)
 //
@@ -86,7 +86,7 @@ pub extern fn sceAudioOutput(channel: c_int, vol: c_int, buf: ?*c_void) c_int;
 // @param buf - Pointer to the PCM data to output.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioOutputBlocking(channel: c_int, vol: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioOutputBlocking(channel: c_int, vol: c_int, buf: ?*anyopaque) c_int;
 
 // Output panned audio of the specified channel
 //
@@ -99,7 +99,7 @@ pub extern fn sceAudioOutputBlocking(channel: c_int, vol: c_int, buf: ?*c_void) 
 // @param buf - Pointer to the PCM data to output.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioOutputPanned(channel: c_int, leftvol: c_int, rightvol: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioOutputPanned(channel: c_int, leftvol: c_int, rightvol: c_int, buf: ?*anyopaque) c_int;
 
 // Output panned audio of the specified channel (blocking)
 //
@@ -112,7 +112,7 @@ pub extern fn sceAudioOutputPanned(channel: c_int, leftvol: c_int, rightvol: c_i
 // @param buf - Pointer to the PCM data to output.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioOutputPannedBlocking(channel: c_int, leftvol: c_int, rightvol: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioOutputPannedBlocking(channel: c_int, leftvol: c_int, rightvol: c_int, buf: ?*anyopaque) c_int;
 
 // Get count of unplayed samples remaining
 //
@@ -182,7 +182,7 @@ pub extern fn sceAudioOutput2ChangeLength(samplecount: c_int) c_int;
 // @param buf - Pointer to the PCM data.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioOutput2OutputBlocking(vol: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioOutput2OutputBlocking(vol: c_int, buf: ?*anyopaque) c_int;
 
 // Get count of unplayed samples remaining
 //
@@ -212,7 +212,7 @@ pub extern fn sceAudioSRCChRelease() c_int;
 // @param buf - Pointer to the PCM data to output.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioSRCOutputBlocking(vol: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioSRCOutputBlocking(vol: c_int, buf: ?*anyopaque) c_int;
 
 // Init audio input
 //
@@ -241,7 +241,7 @@ pub extern fn sceAudioInputInitEx(params: [*]PspAudioInputParams) c_int;
 // @param buf - Pointer to where the audio data will be stored.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioInputBlocking(samplecount: c_int, freq: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioInputBlocking(samplecount: c_int, freq: c_int, buf: ?*anyopaque) c_int;
 
 // Perform audio input
 //
@@ -252,7 +252,7 @@ pub extern fn sceAudioInputBlocking(samplecount: c_int, freq: c_int, buf: ?*c_vo
 // @param buf - Pointer to where the audio data will be stored.
 //
 // @return 0 on success, an error if less than 0.
-pub extern fn sceAudioInput(samplecount: c_int, freq: c_int, buf: ?*c_void) c_int;
+pub extern fn sceAudioInput(samplecount: c_int, freq: c_int, buf: ?*anyopaque) c_int;
 
 // Get the number of samples that were acquired
 //

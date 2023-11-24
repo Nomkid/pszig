@@ -15,7 +15,7 @@ comptime {
     asm (macro.import_function("SysMemUserForUser", "0xFC114573", "sceKernelGetCompiledSdkVersion"));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const PspSysMemBlockTypes = enum(c_int) {
     MemLow = 0,
@@ -33,9 +33,9 @@ pub const SceKernelSysMemAlloc_t = c_int;
 // @param addr - If type is PSP_SMEM_Addr, then addr specifies the lowest address allocate the block from.
 //
 // @return The UID of the new block, or if less than 0 an error.
-pub extern fn sceKernelAllocPartitionMemory(partitionid: SceUID, name: [*c]const u8, typec: c_int, size: SceSize, addr: ?*anyopaque) SceUID;
+pub extern fn sceKernelAllocPartitionMemory(partitionid: t.SceUID, name: [*c]const u8, typec: c_int, size: t.SceSize, addr: ?*anyopaque) t.SceUID;
 
-pub fn kernelAllocPartitionMemory(partitionid: SceUID, name: [*c]const u8, typec: c_int, size: SceSize, addr: ?*anyopaque) !SceUID {
+pub fn kernelAllocPartitionMemory(partitionid: t.SceUID, name: [*c]const u8, typec: c_int, size: t.SceSize, addr: ?*anyopaque) !t.SceUID {
     var res = sceKernelAllocPartitionMemory(partitionid, name, typec, size, addr);
     if (res < 0) {
         return error.AllocationError;
@@ -48,24 +48,24 @@ pub fn kernelAllocPartitionMemory(partitionid: SceUID, name: [*c]const u8, typec
 // @param blockid - UID of the block to free.
 //
 // @return ? on success, less than 0 on error.
-pub extern fn sceKernelFreePartitionMemory(blockid: SceUID) c_int;
+pub extern fn sceKernelFreePartitionMemory(blockid: t.SceUID) c_int;
 
 // Get the address of a memory block.
 //
 // @param blockid - UID of the memory block.
 //
 // @return The lowest address belonging to the memory block.
-pub extern fn sceKernelGetBlockHeadAddr(blockid: SceUID) ?*anyopaque;
+pub extern fn sceKernelGetBlockHeadAddr(blockid: t.SceUID) ?*anyopaque;
 
 // Get the total amount of free memory.
 //
 // @return The total amount of free memory, in bytes.
-pub extern fn sceKernelTotalFreeMemSize() SceSize;
+pub extern fn sceKernelTotalFreeMemSize() t.SceSize;
 
 // Get the size of the largest free memory block.
 //
 // @return The size of the largest free memory block, in bytes.
-pub extern fn sceKernelMaxFreeMemSize() SceSize;
+pub extern fn sceKernelMaxFreeMemSize() t.SceSize;
 
 // Get the firmware version.
 //

@@ -59,84 +59,84 @@ comptime {
     asm (macro.generic_abi_wrapper("sceMpegAvcDecode", 5));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const SceMpegLLI = extern struct {
-    pSrc: ScePVoid,
-    pDst: ScePVoid,
-    Next: ScePVoid,
-    iSize: SceInt32,
+    pSrc: t.ScePVoid,
+    pDst: t.ScePVoid,
+    Next: t.ScePVoid,
+    iSize: t.SceInt32,
 };
 
 pub const SceMpegYCrCbBuffer = extern struct {
-    iFrameBufferHeight16: SceInt32,
-    iFrameBufferWidth16: SceInt32,
-    iUnknown: SceInt32,
-    iUnknown2: SceInt32,
-    pYBuffer: ScePVoid,
-    pYBuffer2: ScePVoid,
-    pCrBuffer: ScePVoid,
-    pCbBuffer: ScePVoid,
-    pCrBuffer2: ScePVoid,
-    pCbBuffer2: ScePVoid,
-    iFrameHeight: SceInt32,
-    iFrameWidth: SceInt32,
-    iFrameBufferWidth: SceInt32,
-    iUnknown3: [11]SceInt32,
+    iFrameBufferHeight16: t.SceInt32,
+    iFrameBufferWidth16: t.SceInt32,
+    iUnknown: t.SceInt32,
+    iUnknown2: t.SceInt32,
+    pYBuffer: t.ScePVoid,
+    pYBuffer2: t.ScePVoid,
+    pCrBuffer: t.ScePVoid,
+    pCbBuffer: t.ScePVoid,
+    pCrBuffer2: t.ScePVoid,
+    pCbBuffer2: t.ScePVoid,
+    iFrameHeight: t.SceInt32,
+    iFrameWidth: t.SceInt32,
+    iFrameBufferWidth: t.SceInt32,
+    iUnknown3: [11]t.SceInt32,
 };
 
-pub const SceMpeg = ScePVoid;
-pub const SceMpegStream = SceVoid;
-pub const sceMpegRingbufferCB = ?fn (ScePVoid, SceInt32, ScePVoid) callconv(.C) SceInt32;
+pub const SceMpeg = t.ScePVoid;
+pub const SceMpegStream = t.SceVoid;
+pub const sceMpegRingbufferCB = ?fn (t.ScePVoid, t.SceInt32, t.ScePVoid) callconv(.C) t.SceInt32;
 
 pub const SceMpegRingbuffer = extern struct {
-    iPackets: SceInt32,
-    iUnk0: SceUInt32,
-    iUnk1: SceUInt32,
-    iUnk2: SceUInt32,
-    iUnk3: SceUInt32,
-    pData: ScePVoid,
+    iPackets: t.SceInt32,
+    iUnk0: t.t.SceUInt32,
+    iUnk1: t.t.SceUInt32,
+    iUnk2: t.t.SceUInt32,
+    iUnk3: t.t.SceUInt32,
+    pData: t.ScePVoid,
     Callback: sceMpegRingbufferCB,
-    pCBparam: ScePVoid,
-    iUnk4: SceUInt32,
-    iUnk5: SceUInt32,
+    pCBparam: t.ScePVoid,
+    iUnk4: t.t.SceUInt32,
+    iUnk5: t.t.SceUInt32,
     pSceMpeg: SceMpeg,
 };
 
 pub const SceMpegAu = extern struct {
-    iPtsMSB: SceUInt32,
-    iPts: SceUInt32,
-    iDtsMSB: SceUInt32,
-    iDts: SceUInt32,
-    iEsBuffer: SceUInt32,
-    iAuSize: SceUInt32,
+    iPtsMSB: t.t.SceUInt32,
+    iPts: t.t.SceUInt32,
+    iDtsMSB: t.t.SceUInt32,
+    iDts: t.t.SceUInt32,
+    iEsBuffer: t.t.SceUInt32,
+    iAuSize: t.t.SceUInt32,
 };
 
 pub const SceMpegAvcMode = extern struct {
-    iUnk0: SceInt32,
-    iPixelFormat: SceInt32,
+    iUnk0: t.SceInt32,
+    iPixelFormat: t.SceInt32,
 };
 
 //MpegBase
-pub extern fn sceMpegBaseYCrCbCopyVme(YUVBuffer: ScePVoid, Buffer: [*c]SceInt32, Type: SceInt32) SceInt32;
-pub extern fn sceMpegBaseCscInit(width: SceInt32) SceInt32;
-pub extern fn sceMpegBaseCscVme(pRGBbuffer: ScePVoid, pRGBbuffer2: ScePVoid, width: SceInt32, pYCrCbBuffer: [*c]SceMpegYCrCbBuffer) SceInt32;
-pub extern fn sceMpegbase_BEA18F91(pLLI: [*c]SceMpegLLI) SceInt32;
+pub extern fn sceMpegBaseYCrCbCopyVme(YUVBuffer: t.ScePVoid, Buffer: [*c]t.SceInt32, Type: t.SceInt32) t.SceInt32;
+pub extern fn sceMpegBaseCscInit(width: t.SceInt32) t.SceInt32;
+pub extern fn sceMpegBaseCscVme(pRGBbuffer: t.ScePVoid, pRGBbuffer2: t.ScePVoid, width: t.SceInt32, pYCrCbBuffer: [*c]SceMpegYCrCbBuffer) t.SceInt32;
+pub extern fn sceMpegbase_BEA18F91(pLLI: [*c]SceMpegLLI) t.SceInt32;
 
 // sceMpegInit
 //
 // @return 0 if success.
-pub extern fn sceMpegInit() SceInt32;
+pub extern fn sceMpegInit() t.SceInt32;
 
 //sceMpegFinish
-pub extern fn sceMpegFinish() SceVoid;
+pub extern fn sceMpegFinish() t.SceVoid;
 
 // sceMpegRingbufferQueryMemSize
 //
 // @param iPackets - number of packets in the ringbuffer
 //
 // @return < 0 if error else ringbuffer data size.
-pub extern fn sceMpegRingbufferQueryMemSize(iPackets: SceInt32) SceInt32;
+pub extern fn sceMpegRingbufferQueryMemSize(iPackets: t.SceInt32) t.SceInt32;
 
 // sceMpegRingbufferConstruct
 //
@@ -148,19 +148,19 @@ pub extern fn sceMpegRingbufferQueryMemSize(iPackets: SceInt32) SceInt32;
 // @param pCBparam - param passed to callback
 //
 // @return 0 if success.
-pub extern fn sceMpegRingbufferConstruct(Ringbuffer: [*c]SceMpegRingbuffer, iPackets: SceInt32, pData: ScePVoid, iSize: SceInt32, Callback: sceMpegRingbufferCB, pCBparam: ScePVoid) SceInt32;
+pub extern fn sceMpegRingbufferConstruct(Ringbuffer: [*c]SceMpegRingbuffer, iPackets: t.SceInt32, pData: t.ScePVoid, iSize: t.SceInt32, Callback: sceMpegRingbufferCB, pCBparam: t.ScePVoid) t.SceInt32;
 
 // sceMpegRingbufferDestruct
 //
 // @param Ringbuffer - pointer to a sceMpegRingbuffer struct
-pub extern fn sceMpegRingbufferDestruct(Ringbuffer: [*c]SceMpegRingbuffer) SceVoid;
+pub extern fn sceMpegRingbufferDestruct(Ringbuffer: [*c]SceMpegRingbuffer) t.SceVoid;
 
 // sceMpegQueryMemSize
 //
 // @param Ringbuffer - pointer to a sceMpegRingbuffer struct
 //
 // @return < 0 if error else number of free packets in the ringbuffer.
-pub extern fn sceMpegRingbufferAvailableSize(Ringbuffer: [*c]SceMpegRingbuffer) SceInt32;
+pub extern fn sceMpegRingbufferAvailableSize(Ringbuffer: [*c]SceMpegRingbuffer) t.SceInt32;
 
 // sceMpegRingbufferPut
 //
@@ -169,14 +169,14 @@ pub extern fn sceMpegRingbufferAvailableSize(Ringbuffer: [*c]SceMpegRingbuffer) 
 // @param iAvailable - free packets in the ringbuffer, should be sceMpegRingbufferAvailableSize()
 //
 // @return < 0 if error else number of packets.
-pub extern fn sceMpegRingbufferPut(Ringbuffer: [*c]SceMpegRingbuffer, iNumPackets: SceInt32, iAvailable: SceInt32) SceInt32;
+pub extern fn sceMpegRingbufferPut(Ringbuffer: [*c]SceMpegRingbuffer, iNumPackets: t.SceInt32, iAvailable: t.SceInt32) t.SceInt32;
 
 // sceMpegQueryMemSize
 //
 // @param iUnk - Unknown, set to 0
 //
 // @return < 0 if error else decoder data size.
-pub extern fn sceMpegQueryMemSize(iUnk: c_int) SceInt32;
+pub extern fn sceMpegQueryMemSize(iUnk: c_int) t.SceInt32;
 
 // sceMpegCreate
 //
@@ -189,12 +189,12 @@ pub extern fn sceMpegQueryMemSize(iUnk: c_int) SceInt32;
 // @param iUnk2 - unknown, set to 0
 //
 // @return 0 if success.
-pub extern fn sceMpegCreate(Mpeg: [*c]SceMpeg, pData: ScePVoid, iSize: SceInt32, Ringbuffer: [*c]SceMpegRingbuffer, iFrameWidth: SceInt32, iUnk1: SceInt32, iUnk2: SceInt32) SceInt32;
+pub extern fn sceMpegCreate(Mpeg: [*c]SceMpeg, pData: t.ScePVoid, iSize: t.SceInt32, Ringbuffer: [*c]SceMpegRingbuffer, iFrameWidth: t.SceInt32, iUnk1: t.SceInt32, iUnk2: t.SceInt32) t.SceInt32;
 
 // sceMpegDelete
 //
 // @param Mpeg - SceMpeg handle
-pub extern fn sceMpegDelete(Mpeg: [*c]SceMpeg) SceVoid;
+pub extern fn sceMpegDelete(Mpeg: [*c]SceMpeg) t.SceVoid;
 
 // sceMpegQueryStreamOffset
 //
@@ -203,7 +203,7 @@ pub extern fn sceMpegDelete(Mpeg: [*c]SceMpeg) SceVoid;
 // @param iOffset - will contain stream offset in bytes, usually 2048
 //
 // @return 0 if success.
-pub extern fn sceMpegQueryStreamOffset(Mpeg: [*c]SceMpeg, pBuffer: ScePVoid, iOffset: [*c]SceInt32) SceInt32;
+pub extern fn sceMpegQueryStreamOffset(Mpeg: [*c]SceMpeg, pBuffer: t.ScePVoid, iOffset: [*c]t.SceInt32) t.SceInt32;
 
 // sceMpegQueryStreamSize
 //
@@ -211,7 +211,7 @@ pub extern fn sceMpegQueryStreamOffset(Mpeg: [*c]SceMpeg, pBuffer: ScePVoid, iOf
 // @param iSize - will contain stream size in bytes
 //
 // @return 0 if success.
-pub extern fn sceMpegQueryStreamSize(pBuffer: ScePVoid, iSize: [*c]SceInt32) SceInt32;
+pub extern fn sceMpegQueryStreamSize(pBuffer: t.ScePVoid, iSize: [*c]t.SceInt32) t.SceInt32;
 
 // sceMpegRegistStream
 //
@@ -220,26 +220,26 @@ pub extern fn sceMpegQueryStreamSize(pBuffer: ScePVoid, iSize: [*c]SceInt32) Sce
 // @param iUnk - unknown, set to 0
 //
 // @return 0 if error.
-pub extern fn sceMpegRegistStream(Mpeg: [*c]SceMpeg, iStreamID: SceInt32, iUnk: SceInt32) ?*SceMpegStream;
+pub extern fn sceMpegRegistStream(Mpeg: [*c]SceMpeg, iStreamID: t.SceInt32, iUnk: t.SceInt32) ?*SceMpegStream;
 
 // sceMpegUnRegistStream
 //
 // @param Mpeg - SceMpeg handle
 // @param pStream - pointer to stream
-pub extern fn sceMpegUnRegistStream(Mpeg: SceMpeg, pStream: ?*SceMpegStream) SceVoid;
+pub extern fn sceMpegUnRegistStream(Mpeg: SceMpeg, pStream: ?*SceMpegStream) t.SceVoid;
 
 // sceMpegFlushAllStreams
 //
 // @return 0 if success.
-pub extern fn sceMpegFlushAllStream(Mpeg: [*c]SceMpeg) SceInt32;
+pub extern fn sceMpegFlushAllStream(Mpeg: [*c]SceMpeg) t.SceInt32;
 
 // sceMpegMallocAvcEsBuf
 //
 // @return 0 if error else pointer to buffer.
-pub extern fn sceMpegMallocAvcEsBuf(Mpeg: [*c]SceMpeg) ScePVoid;
+pub extern fn sceMpegMallocAvcEsBuf(Mpeg: [*c]SceMpeg) t.ScePVoid;
 
 // sceMpegFreeAvcEsBuf
-pub extern fn sceMpegFreeAvcEsBuf(Mpeg: [*c]SceMpeg, pBuf: ScePVoid) SceVoid;
+pub extern fn sceMpegFreeAvcEsBuf(Mpeg: [*c]SceMpeg, pBuf: t.ScePVoid) t.SceVoid;
 
 // sceMpegQueryAtracEsSize
 //
@@ -248,7 +248,7 @@ pub extern fn sceMpegFreeAvcEsBuf(Mpeg: [*c]SceMpeg, pBuf: ScePVoid) SceVoid;
 // @param iOutSize - will contain size of decoded data
 //
 // @return 0 if success.
-pub extern fn sceMpegQueryAtracEsSize(Mpeg: [*c]SceMpeg, iEsSize: [*c]SceInt32, iOutSize: [*c]SceInt32) SceInt32;
+pub extern fn sceMpegQueryAtracEsSize(Mpeg: [*c]SceMpeg, iEsSize: [*c]t.SceInt32, iOutSize: [*c]t.SceInt32) t.SceInt32;
 
 // sceMpegInitAu
 //
@@ -257,7 +257,7 @@ pub extern fn sceMpegQueryAtracEsSize(Mpeg: [*c]SceMpeg, iEsSize: [*c]SceInt32, 
 // @param pAu - will contain pointer to Au
 //
 // @return 0 if success.
-pub extern fn sceMpegInitAu(Mpeg: [*c]SceMpeg, pEsBuffer: ScePVoid, pAu: [*c]SceMpegAu) SceInt32;
+pub extern fn sceMpegInitAu(Mpeg: [*c]SceMpeg, pEsBuffer: t.ScePVoid, pAu: [*c]SceMpegAu) t.SceInt32;
 
 // sceMpegGetAvcAu
 //
@@ -267,14 +267,14 @@ pub extern fn sceMpegInitAu(Mpeg: [*c]SceMpeg, pEsBuffer: ScePVoid, pAu: [*c]Sce
 // @param iUnk - unknown
 //
 // @return 0 if success.
-pub extern fn sceMpegGetAvcAu(Mpeg: [*c]SceMpeg, pStream: ?*SceMpegStream, pAu: [*c]SceMpegAu, iUnk: [*c]SceInt32) SceInt32;
+pub extern fn sceMpegGetAvcAu(Mpeg: [*c]SceMpeg, pStream: ?*SceMpegStream, pAu: [*c]SceMpegAu, iUnk: [*c]t.SceInt32) t.SceInt32;
 
 // sceMpegAvcDecodeMode
 //
 // @param Mpeg - SceMpeg handle
 // @param pMode - pointer to SceMpegAvcMode struct defining the decode mode (pixelformat)
 // @return 0 if success.
-pub extern fn sceMpegAvcDecodeMode(Mpeg: [*c]SceMpeg, pMode: [*c]SceMpegAvcMode) SceInt32;
+pub extern fn sceMpegAvcDecodeMode(Mpeg: [*c]SceMpeg, pMode: [*c]SceMpegAvcMode) t.SceInt32;
 
 // sceMpegAvcDecode
 //
@@ -285,7 +285,7 @@ pub extern fn sceMpegAvcDecodeMode(Mpeg: [*c]SceMpeg, pMode: [*c]SceMpegAvcMode)
 // @param iInit - will be set to 0 on first call, then 1
 //
 // @return 0 if success.
-pub extern fn sceMpegAvcDecode(Mpeg: [*c]SceMpeg, pAu: [*c]SceMpegAu, iFrameWidth: SceInt32, pBuffer: ScePVoid, iInit: [*c]SceInt32) SceInt32;
+pub extern fn sceMpegAvcDecode(Mpeg: [*c]SceMpeg, pAu: [*c]SceMpegAu, iFrameWidth: t.SceInt32, pBuffer: t.ScePVoid, iInit: [*c]t.SceInt32) t.SceInt32;
 
 // sceMpegAvcDecodeStop
 //
@@ -295,7 +295,7 @@ pub extern fn sceMpegAvcDecode(Mpeg: [*c]SceMpeg, pAu: [*c]SceMpegAu, iFrameWidt
 // @param iStatus - frame number
 //
 // @return 0 if success.
-pub extern fn sceMpegAvcDecodeStop(Mpeg: [*c]SceMpeg, iFrameWidth: SceInt32, pBuffer: ScePVoid, iStatus: [*c]SceInt32) SceInt32;
+pub extern fn sceMpegAvcDecodeStop(Mpeg: [*c]SceMpeg, iFrameWidth: t.SceInt32, pBuffer: t.ScePVoid, iStatus: [*c]t.SceInt32) t.SceInt32;
 
 // sceMpegGetAtracAu
 //
@@ -305,7 +305,7 @@ pub extern fn sceMpegAvcDecodeStop(Mpeg: [*c]SceMpeg, iFrameWidth: SceInt32, pBu
 // @param pUnk - unknown
 //
 // @return 0 if success.
-pub extern fn sceMpegGetAtracAu(Mpeg: [*c]SceMpeg, pStream: ?*SceMpegStream, pAu: [*c]SceMpegAu, pUnk: ScePVoid) SceInt32;
+pub extern fn sceMpegGetAtracAu(Mpeg: [*c]SceMpeg, pStream: ?*SceMpegStream, pAu: [*c]SceMpegAu, pUnk: t.ScePVoid) t.SceInt32;
 
 // sceMpegAtracDecode
 //
@@ -315,7 +315,7 @@ pub extern fn sceMpegGetAtracAu(Mpeg: [*c]SceMpeg, pStream: ?*SceMpegStream, pAu
 // @param iInit - set this to 1 on first call
 //
 // @return 0 if success.
-pub extern fn sceMpegAtracDecode(Mpeg: [*c]SceMpeg, pAu: [*c]SceMpegAu, pBuffer: ScePVoid, iInit: SceInt32) SceInt32;
+pub extern fn sceMpegAtracDecode(Mpeg: [*c]SceMpeg, pAu: [*c]SceMpegAu, pBuffer: t.ScePVoid, iInit: t.SceInt32) t.SceInt32;
 
 // MIT License
 //

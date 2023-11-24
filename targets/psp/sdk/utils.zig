@@ -32,7 +32,7 @@ comptime {
     asm (macro.import_function("UtilsForUser", "0xC2DF770E", "sceKernelIcacheInvalidateRange"));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const clock_t = u32;
 pub const suseconds_t = u32;
@@ -53,17 +53,17 @@ pub const SceKernelUtilsMt19937Context = extern struct {
 pub const SceKernelUtilsMd5Context = extern struct {
     h: [4]c_uint,
     pad: c_uint,
-    usRemains: SceUShort16,
-    usComputed: SceUShort16,
-    ullTotalLen: SceULong64,
+    usRemains: t.SceUShort16,
+    usComputed: t.SceUShort16,
+    ullTotalLen: t.SceULong64,
     buf: [64]u8,
 };
 
 pub const SceKernelUtilsSha1Context = extern struct {
     h: [5]c_uint,
-    usRemains: SceUShort16,
-    usComputed: SceUShort16,
-    ullTotalLen: SceULong64,
+    usRemains: t.SceUShort16,
+    usComputed: t.SceUShort16,
+    ullTotalLen: t.SceULong64,
     buf: [64]u8,
 };
 

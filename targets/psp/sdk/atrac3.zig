@@ -33,7 +33,7 @@ comptime {
     asm (macro.generic_abi_wrapper("sceAtracDecodeData", 5));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 test {
     @import("std").meta.refAllDecls(@This());
 }
@@ -129,7 +129,7 @@ pub fn atracGetAtracID(uiCodecType: AtracCodecType) !i32 {
 // @param bufsize - the size of the buffer pointed by buf
 //
 // @return the new atrac ID, or < 0 on error
-pub extern fn sceAtracSetDataAndGetID(buf: ?*anyopaque, bufsize: SceSize) c_int;
+pub extern fn sceAtracSetDataAndGetID(buf: ?*anyopaque, bufsize: t.SceSize) c_int;
 
 pub fn atracSetDataAndGetID(buf: *anyopaque, bufSize: usize) !u32 {
     var res = sceAtracSetDataAndGetID(buf, bufSize);

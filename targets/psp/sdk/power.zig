@@ -52,7 +52,7 @@ comptime {
     asm (macro.import_function("scePower", "0x737486F2", "scePowerSetClockFrequency"));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const PSPPowerCB = enum(u32) {
     Battpower = 0x0000007f,
@@ -77,8 +77,8 @@ pub const powerCallback_t = ?fn (c_int, c_int) callconv(.C) void;
 // @param cbid - callback id from calling sceKernelCreateCallback
 //
 // @return 0 on success, the slot number if -1 is passed, < 0 on error.
-pub extern fn scePowerRegisterCallback(slot: c_int, cbid: SceUID) c_int;
-pub fn powerRegisterCallback(slot: c_int, cbid: SceUID) !i32 {
+pub extern fn scePowerRegisterCallback(slot: c_int, cbid: t.SceUID) c_int;
+pub fn powerRegisterCallback(slot: c_int, cbid: t.SceUID) !i32 {
     var res = scePowerRegisterCallback(slot, cbid);
     if (res < 0) {
         return error.Unexpected;

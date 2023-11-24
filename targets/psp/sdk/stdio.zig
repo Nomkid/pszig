@@ -15,22 +15,22 @@ comptime {
     asm (macro.import_function("StdioForUser", "0xF78BA90A", "sceKernelStderr"));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 // Function to get the current standard in file no
 //
 // @return The stdin fileno
-pub extern fn sceKernelStdin() SceUID;
+pub extern fn sceKernelStdin() t.SceUID;
 
 // Function to get the current standard out file no
 //
 // @return The stdout fileno
-pub extern fn sceKernelStdout() SceUID;
+pub extern fn sceKernelStdout() t.SceUID;
 
 // Function to get the current standard err file no
 //
 // @return The stderr fileno
-pub extern fn sceKernelStderr() SceUID;
+pub extern fn sceKernelStderr() t.SceUID;
 
 // MIT License
 //

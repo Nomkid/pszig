@@ -220,9 +220,9 @@ pub const Stat = struct {
     mode: u32,
     st_attr: c_uint,
     size: u64,
-    st_ctime: ScePspDateTime,
-    st_atime: ScePspDateTime,
-    st_mtime: ScePspDateTime,
+    st_ctime: t.ScePspDateTime,
+    st_atime: t.ScePspDateTime,
+    st_mtime: t.ScePspDateTime,
     st_private: [6]c_uint,
     ino: ino_t,
 

@@ -164,6 +164,8 @@ comptime {
     asm (macro.generic_abi_wrapper("sceNetResolverStartAtoN", 6));
 }
 
+const t = @import("util/types.zig");
+
 pub const struct_SceNetMallocStat = extern struct {
     pool: c_int,
     maximum: c_int,
@@ -454,10 +456,10 @@ pub const struct_in_addr = packed struct {
 };
 
 pub extern fn sceNetResolverInit() c_int;
-pub extern fn sceNetResolverCreate(rid: [*c]c_int, buf: ?*anyopaque, buflen: SceSize) c_int;
+pub extern fn sceNetResolverCreate(rid: [*c]c_int, buf: ?*anyopaque, buflen: t.SceSize) c_int;
 pub extern fn sceNetResolverDelete(rid: c_int) c_int;
 pub extern fn sceNetResolverStartNtoA(rid: c_int, hostname: [*c]const u8, addr: [*c]struct_in_addr, timeout: c_uint, retry: c_int) c_int;
-pub extern fn sceNetResolverStartAtoN(rid: c_int, addr: [*c]const struct_in_addr, hostname: [*c]u8, hostname_len: SceSize, timeout: c_uint, retry: c_int) c_int;
+pub extern fn sceNetResolverStartAtoN(rid: c_int, addr: [*c]const struct_in_addr, hostname: [*c]u8, hostname_len: t.SceSize, timeout: c_uint, retry: c_int) c_int;
 pub extern fn sceNetResolverStop(rid: c_int) c_int;
 pub extern fn sceNetResolverTerm() c_int;
 

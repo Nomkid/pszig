@@ -9,11 +9,11 @@ comptime {
     asm (macro.import_function("LoadExecForUser", "0x4AC57943", "sceKernelRegisterExitCallback"));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const SceKernelLoadExecParam = extern struct {
-    size: SceSize,
-    args: SceSize,
+    size: t.SceSize,
+    args: t.SceSize,
     argp: ?*anyopaque,
     key: [*c]const u8,
 };

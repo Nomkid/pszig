@@ -37,7 +37,7 @@ pub const PSPAllocator = struct {
         if (len > 0) {
 
             //Gets a block of memory
-            var id: SceUID = sceKernelAllocPartitionMemory(2, "block", @intFromEnum(PspSysMemBlockTypes.MemLow), len + @sizeOf(SceUID), null);
+            var id: t.SceUID = sceKernelAllocPartitionMemory(2, "block", @intFromEnum(PspSysMemBlockTypes.MemLow), len + @sizeOf(t.SceUID), null);
 
             if (id < 0) {
                 //TODO: Handle error cases that aren't out of memory...
@@ -52,7 +52,7 @@ pub const PSPAllocator = struct {
 
             //Convert and return
             var ptr2 = @as([*]u8, @ptrCast(ptr));
-            ptr2 += @sizeOf(SceUID);
+            ptr2 += @sizeOf(t.SceUID);
 
             return ptr2[0..len];
         }
@@ -67,7 +67,7 @@ pub const PSPAllocator = struct {
         var ptr = @as([*]u8, @ptrCast(buf_unaligned));
 
         //Go back to our ID
-        ptr -= @sizeOf(SceUID);
+        ptr -= @sizeOf(t.SceUID);
         var id = @as(*c_int, @ptrCast(@alignCast(4, ptr))).*;
 
         //Free the ID

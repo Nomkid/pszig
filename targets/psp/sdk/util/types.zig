@@ -37,23 +37,23 @@ pub fn _sd(arg_val: u64, arg_addr: u32) callconv(.C) void {
     @as([*c]volatile vu64, @ptrFromInt(addr)).?.* = val;
 }
 
-pub const SceUChar8 = u8;
-pub const SceUShort16 = u16;
-pub const SceUInt32 = u32;
-pub const SceUInt64 = u64;
-pub const SceULong64 = u64;
+pub const t.t.SceUChar8 = u8;
+pub const t.SceUShort16 = u16;
+pub const t.t.SceUInt32 = u32;
+pub const t.SceUInt64 = u64;
+pub const t.SceULong64 = u64;
 pub const SceChar8 = u8;
-pub const SceShort16 = i16;
-pub const SceInt32 = i32;
-pub const SceInt64 = i64;
+pub const t.SceShort16 = i16;
+pub const t.SceInt32 = i32;
+pub const t.SceInt64 = i64;
 pub const SceLong64 = i64;
 pub const SceFloat = f32;
 pub const SceFloat32 = f32;
 pub const SceWChar16 = c_ushort;
 pub const SceWChar32 = c_uint;
-pub const SceBool = c_int;
-pub const SceVoid = anyopaque;
-pub const ScePVoid = ?*anyopaque;
+pub const t.SceBool = c_int;
+pub const t.SceVoid = anyopaque;
+pub const t.ScePVoid = ?*anyopaque;
 pub const ScePspSRect = extern struct {
     x: c_short,
     y: c_short,
@@ -281,7 +281,7 @@ pub const ScePspUnion32 = extern union {
 };
 
 pub const ScePspUnion64 = extern union {
-    ul: SceULong64,
+    ul: t.SceULong64,
     l: SceLong64,
     ui: [2]c_uint,
     i: [2]c_int,
@@ -299,7 +299,7 @@ pub const ScePspUnion64 = extern union {
 };
 
 pub const ScePspUnion128 = extern union {
-    ul: [2]SceULong64,
+    ul: [2]t.SceULong64,
     l: [2]SceLong64,
     ui: [4]c_uint,
     i: [4]c_int,
@@ -320,7 +320,7 @@ pub const ScePspUnion128 = extern union {
     rgb565: [8]ScePspRGB565,
 };
 
-pub const ScePspDateTime = extern struct {
+pub const t.ScePspDateTime = extern struct {
     year: c_ushort,
     month: c_ushort,
     day: c_ushort,
@@ -330,14 +330,14 @@ pub const ScePspDateTime = extern struct {
     microsecond: c_uint,
 };
 
-pub const SceUID = c_int;
-pub const SceSize = c_uint;
+pub const t.SceUID = c_int;
+pub const t.SceSize = c_uint;
 pub const SceSSize = c_int;
-pub const SceUChar = u8;
-pub const SceUInt = c_uint;
-pub const SceMode = c_int;
-pub const SceOff = SceInt64;
-pub const SceIores = SceInt64;
+pub const t.SceUChar = u8;
+pub const t.SceUInt = c_uint;
+pub const t.SceMode = c_int;
+pub const t.SceOff = t.SceInt64;
+pub const SceIores = t.SceInt64;
 
 // MIT License
 //

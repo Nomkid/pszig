@@ -1,8 +1,8 @@
 // License details can be found at the bottom of this file.
 
-usingnamespace @import("../sdk/threadman.zig");
-usingnamespace @import("../sdk/loadexec.zig");
-usingnamespace @import("../sdk/util/types.zig");
+const threadman = @import("../sdk/threadman.zig");
+const loadexec = @import("../sdk/loadexec.zig");
+const t = @import("../sdk/util/types.zig");
 
 var requestedExit: bool = false;
 
@@ -13,32 +13,38 @@ pub fn isRunning() bool {
 
 //Exit
 export fn exitCB(arg1: c_int, arg2: c_int, common: ?*anyopaque) c_int {
+    _ = common;
+    _ = arg2;
+    _ = arg1;
     requestedExit = true;
-    sceKernelExitGame();
+    loadexec.sceKernelExitGame();
     return 0;
 }
 
 //Thread for home button exit thread.
-export fn cbThread(args: SceSize, argp: ?*anyopaque) c_int {
+export fn cbThread(args: t.SceSize, argp: ?*anyopaque) c_int {
+    _ = argp;
+    _ = args;
     var cbID: i32 = -1;
 
-    cbID = sceKernelCreateCallback("zig_exit_callback", exitCB, null);
-    var status = sceKernelRegisterExitCallback(cbID);
+    cbID = loadexec.sceKernelCreateCallback("zig_exit_callback", exitCB, null);
+    var status = loadexec.sceKernelRegisterExitCallback(cbID);
 
     if (status < 0) {
         @panic("Could not setup a home button callback!");
     }
 
-    status = sceKernelSleepThreadCB();
+    status = threadman.sceKernelSleepThreadCB();
 
     return 0;
 }
 
 //This enables the home button exit callback above
 pub fn enableHBCB() void {
-    var threadID: i32 = sceKernelCreateThread("zig_callback_updater", cbThread, 0x11, 0xFA0, @intFromEnum(PspThreadAttributes.PSP_THREAD_ATTR_USER), null);
+    var threadID: i32 = threadman.sceKernelCreateThread("zig_callback_updater", cbThread, 0x11, 0xFA0, @intFromEnum(threadman.PspThreadAttributes.PSP_THREAD_ATTR_USER), null);
     if (threadID >= 0) {
-        var stat: i32 = sceKernelStartThread(threadID, 0, null); //We don't know what stat does.
+        var stat: i32 = threadman.sceKernelStartThread(threadID, 0, null);
+        _ = stat; //We don't know what stat does.
     } else {
         @panic("Could not setup a home button callback thread!");
     }

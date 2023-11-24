@@ -61,6 +61,8 @@ comptime {
     asm (macro.import_function("sceUtility", "0x86ABDB1B", "sceUtilityNpSigninGetStatus"));
 }
 
+const t = @import("util/types.zig");
+
 pub const PspUtilityDialogCommon = extern struct {
     size: c_uint,
     language: c_int,
@@ -175,8 +177,8 @@ pub const PspUtilitySavedataSFOParam = extern struct {
 
 pub const PspUtilitySavedataFileData = extern struct {
     buf: ?*anyopaque,
-    bufSize: SceSize,
-    size: SceSize,
+    bufSize: t.SceSize,
+    size: t.SceSize,
     unknown: c_int,
 };
 
@@ -197,8 +199,8 @@ pub const SceUtilitySavedataParam = extern struct {
     fileName: [13]u8,
     reserved1: [3]u8,
     dataBuf: ?*anyopaque,
-    dataBufSize: SceSize,
-    dataSize: SceSize,
+    dataBufSize: t.SceSize,
+    dataSize: t.SceSize,
     sfoParam: PspUtilitySavedataSFOParam,
     icon0FileData: PspUtilitySavedataFileData,
     icon1FileData: PspUtilitySavedataFileData,

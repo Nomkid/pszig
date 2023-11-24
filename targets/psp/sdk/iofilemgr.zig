@@ -47,7 +47,7 @@ comptime {
     asm (macro.generic_abi_wrapper("sceIoIoctlAsync", 6));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const enum_IOAccessModes = enum(c_int) {
     FIO_S_IFMT = 61440,
@@ -98,12 +98,12 @@ pub const PSP_SEEK_SET = 0;
 pub const PSP_O_APPEND = 0x0100;
 
 pub const SceIoStat = extern struct {
-    st_mode: SceMode,
+    st_mode: t.SceMode,
     st_attr: c_uint,
-    st_size: SceOff,
-    st_ctime: ScePspDateTime,
-    st_atime: ScePspDateTime,
-    st_mtime: ScePspDateTime,
+    st_size: t.SceOff,
+    st_ctime: t.ScePspDateTime,
+    st_atime: t.ScePspDateTime,
+    st_mtime: t.ScePspDateTime,
     st_private: [6]c_uint,
 };
 
@@ -120,42 +120,42 @@ pub const enum_IoAssignPerms = enum(c_int) {
     IOASSIGN_RDONLY = 1,
     _,
 };
-pub extern fn sceIoOpen(file: [*c]const u8, flags: c_int, mode: u32) SceUID;
-pub extern fn sceIoOpenAsync(file: [*c]const u8, flags: c_int, mode: u32) SceUID;
-pub extern fn sceIoClose(fd: SceUID) c_int;
-pub extern fn sceIoCloseAsync(fd: SceUID) c_int;
-pub extern fn sceIoRead(fd: SceUID, data: ?*anyopaque, size: SceSize) c_int;
-pub extern fn sceIoReadAsync(fd: SceUID, data: ?*anyopaque, size: SceSize) c_int;
-pub extern fn sceIoWrite(fd: SceUID, data: ?*const anyopaque, size: SceSize) c_int;
-pub extern fn sceIoWriteAsync(fd: SceUID, data: ?*const anyopaque, size: SceSize) c_int;
-pub extern fn sceIoLseek(fd: SceUID, offset: SceOff, whence: c_int) i64;
-pub extern fn sceIoLseekAsync(fd: SceUID, offset: SceOff, whence: c_int) c_int;
-pub extern fn sceIoLseek32(fd: SceUID, offset: c_int, whence: c_int) c_int;
-pub extern fn sceIoLseek32Async(fd: SceUID, offset: c_int, whence: c_int) c_int;
+pub extern fn sceIoOpen(file: [*c]const u8, flags: c_int, mode: u32) t.SceUID;
+pub extern fn sceIoOpenAsync(file: [*c]const u8, flags: c_int, mode: u32) t.SceUID;
+pub extern fn sceIoClose(fd: t.SceUID) c_int;
+pub extern fn sceIoCloseAsync(fd: t.SceUID) c_int;
+pub extern fn sceIoRead(fd: t.SceUID, data: ?*anyopaque, size: t.SceSize) c_int;
+pub extern fn sceIoReadAsync(fd: t.SceUID, data: ?*anyopaque, size: t.SceSize) c_int;
+pub extern fn sceIoWrite(fd: t.SceUID, data: ?*const anyopaque, size: t.SceSize) c_int;
+pub extern fn sceIoWriteAsync(fd: t.SceUID, data: ?*const anyopaque, size: t.SceSize) c_int;
+pub extern fn sceIoLseek(fd: t.SceUID, offset: t.SceOff, whence: c_int) i64;
+pub extern fn sceIoLseekAsync(fd: t.SceUID, offset: t.SceOff, whence: c_int) c_int;
+pub extern fn sceIoLseek32(fd: t.SceUID, offset: c_int, whence: c_int) c_int;
+pub extern fn sceIoLseek32Async(fd: t.SceUID, offset: c_int, whence: c_int) c_int;
 pub extern fn sceIoRemove(file: [*c]const u8) c_int;
 pub extern fn sceIoMkdir(dir: [*c]const u8, mode: u32) c_int;
 pub extern fn sceIoRmdir(path: [*c]const u8) c_int;
 pub extern fn sceIoChdir(path: [*c]const u8) c_int;
 pub extern fn sceIoRename(oldname: [*c]const u8, newname: [*c]const u8) c_int;
-pub extern fn sceIoDopen(dirname: [*c]const u8) SceUID;
-pub extern fn sceIoDread(fd: SceUID, dir: [*c]SceIoDirent) c_int;
-pub extern fn sceIoDclose(fd: SceUID) c_int;
+pub extern fn sceIoDopen(dirname: [*c]const u8) t.SceUID;
+pub extern fn sceIoDread(fd: t.SceUID, dir: [*c]SceIoDirent) c_int;
+pub extern fn sceIoDclose(fd: t.SceUID) c_int;
 pub extern fn sceIoDevctl(dev: [*c]const u8, cmd: c_uint, indata: ?*anyopaque, inlen: c_int, outdata: ?*anyopaque, outlen: c_int) c_int;
 pub extern fn sceIoAssign(dev1: [*c]const u8, dev2: [*c]const u8, dev3: [*c]const u8, mode: c_int, unk1: ?*anyopaque, unk2: c_long) c_int;
 pub extern fn sceIoUnassign(dev: [*c]const u8) c_int;
 pub extern fn sceIoGetstat(file: [*c]const u8, stat: [*c]SceIoStat) c_int;
 pub extern fn sceIoChstat(file: [*c]const u8, stat: [*c]SceIoStat, bits: c_int) c_int;
-pub extern fn sceIoIoctl(fd: SceUID, cmd: c_uint, indata: ?*anyopaque, inlen: c_int, outdata: ?*anyopaque, outlen: c_int) c_int;
-pub extern fn sceIoIoctlAsync(fd: SceUID, cmd: c_uint, indata: ?*anyopaque, inlen: c_int, outdata: ?*anyopaque, outlen: c_int) c_int;
+pub extern fn sceIoIoctl(fd: t.SceUID, cmd: c_uint, indata: ?*anyopaque, inlen: c_int, outdata: ?*anyopaque, outlen: c_int) c_int;
+pub extern fn sceIoIoctlAsync(fd: t.SceUID, cmd: c_uint, indata: ?*anyopaque, inlen: c_int, outdata: ?*anyopaque, outlen: c_int) c_int;
 pub extern fn sceIoSync(device: [*c]const u8, unk: c_uint) c_int;
-pub extern fn sceIoWaitAsync(fd: SceUID, res: [*c]SceInt64) c_int;
-pub extern fn sceIoWaitAsyncCB(fd: SceUID, res: [*c]SceInt64) c_int;
-pub extern fn sceIoPollAsync(fd: SceUID, res: [*c]SceInt64) c_int;
-pub extern fn sceIoGetAsyncStat(fd: SceUID, poll: c_int, res: [*c]SceInt64) c_int;
-pub extern fn sceIoCancel(fd: SceUID) c_int;
-pub extern fn sceIoGetDevType(fd: SceUID) c_int;
-pub extern fn sceIoChangeAsyncPriority(fd: SceUID, pri: c_int) c_int;
-pub extern fn sceIoSetAsyncCallback(fd: SceUID, cb: SceUID, argp: ?*anyopaque) c_int;
+pub extern fn sceIoWaitAsync(fd: t.SceUID, res: [*c]t.SceInt64) c_int;
+pub extern fn sceIoWaitAsyncCB(fd: t.SceUID, res: [*c]t.SceInt64) c_int;
+pub extern fn sceIoPollAsync(fd: t.SceUID, res: [*c]t.SceInt64) c_int;
+pub extern fn sceIoGetAsyncStat(fd: t.SceUID, poll: c_int, res: [*c]t.SceInt64) c_int;
+pub extern fn sceIoCancel(fd: t.SceUID) c_int;
+pub extern fn sceIoGetDevType(fd: t.SceUID) c_int;
+pub extern fn sceIoChangeAsyncPriority(fd: t.SceUID, pri: c_int) c_int;
+pub extern fn sceIoSetAsyncCallback(fd: t.SceUID, cb: t.SceUID, argp: ?*anyopaque) c_int;
 pub const struct_PspIoDrv = extern struct {
     name: [*c]const u8,
     dev_type: u32,
@@ -179,14 +179,14 @@ pub const PspIoDrvFileArg = struct_PspIoDrvFileArg;
 pub const struct_PspIoDrvFuncs = extern struct {
     IoInit: ?fn ([*c]PspIoDrvArg) callconv(.C) c_int,
     IoExit: ?fn ([*c]PspIoDrvArg) callconv(.C) c_int,
-    IoOpen: ?fn ([*c]PspIoDrvFileArg, [*c]u8, c_int, SceMode) callconv(.C) c_int,
+    IoOpen: ?fn ([*c]PspIoDrvFileArg, [*c]u8, c_int, t.SceMode) callconv(.C) c_int,
     IoClose: ?fn ([*c]PspIoDrvFileArg) callconv(.C) c_int,
     IoRead: ?fn ([*c]PspIoDrvFileArg, [*c]u8, c_int) callconv(.C) c_int,
     IoWrite: ?fn ([*c]PspIoDrvFileArg, [*c]const u8, c_int) callconv(.C) c_int,
-    IoLseek: ?fn ([*c]PspIoDrvFileArg, SceOff, c_int) callconv(.C) SceOff,
+    IoLseek: ?fn ([*c]PspIoDrvFileArg, t.SceOff, c_int) callconv(.C) t.SceOff,
     IoIoctl: ?fn ([*c]PspIoDrvFileArg, c_uint, ?*anyopaque, c_int, ?*anyopaque, c_int) callconv(.C) c_int,
     IoRemove: ?fn ([*c]PspIoDrvFileArg, [*c]const u8) callconv(.C) c_int,
-    IoMkdir: ?fn ([*c]PspIoDrvFileArg, [*c]const u8, SceMode) callconv(.C) c_int,
+    IoMkdir: ?fn ([*c]PspIoDrvFileArg, [*c]const u8, t.SceMode) callconv(.C) c_int,
     IoRmdir: ?fn ([*c]PspIoDrvFileArg, [*c]const u8) callconv(.C) c_int,
     IoDopen: ?fn ([*c]PspIoDrvFileArg, [*c]const u8) callconv(.C) c_int,
     IoDclose: ?fn ([*c]PspIoDrvFileArg) callconv(.C) c_int,
@@ -204,9 +204,9 @@ pub const PspIoDrvFuncs = struct_PspIoDrvFuncs;
 pub const PspIoDrv = struct_PspIoDrv;
 pub extern fn sceIoAddDrv(drv: [*c]PspIoDrv) c_int;
 pub extern fn sceIoDelDrv(drv_name: [*c]const u8) c_int;
-pub extern fn sceIoReopen(file: [*c]const u8, flags: c_int, mode: SceMode, fd: SceUID) c_int;
-pub extern fn sceIoGetThreadCwd(uid: SceUID, dir: [*c]u8, len: c_int) c_int;
-pub extern fn sceIoChangeThreadCwd(uid: SceUID, dir: [*c]u8) c_int;
+pub extern fn sceIoReopen(file: [*c]const u8, flags: c_int, mode: t.SceMode, fd: t.SceUID) c_int;
+pub extern fn sceIoGetThreadCwd(uid: t.SceUID, dir: [*c]u8, len: c_int) c_int;
+pub extern fn sceIoChangeThreadCwd(uid: t.SceUID, dir: [*c]u8) c_int;
 
 pub const IOAccessModes = enum_IOAccessModes;
 pub const IOFileModes = enum_IOFileModes;

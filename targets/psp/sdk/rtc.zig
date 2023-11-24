@@ -46,7 +46,7 @@ comptime {
     asm (macro.import_function("sceRtc", "0xE1C93E47", "sceRtcGetTime64_t"));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const time_t = u32;
 const struct_unnamed_5 = extern struct {

@@ -20,12 +20,12 @@ comptime {
     asm (macro.generic_abi_wrapper("sceKernelStopModule", 5));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 pub const SceKernelLMOption = extern struct {
-    size: SceSize,
-    mpidtext: SceUID,
-    mpiddata: SceUID,
+    size: t.SceSize,
+    mpidtext: t.SceUID,
+    mpiddata: t.SceUID,
     flags: c_uint,
     position: u8,
     access: u8,
@@ -33,15 +33,15 @@ pub const SceKernelLMOption = extern struct {
 };
 
 pub const SceKernelSMOption = extern struct {
-    size: SceSize,
-    mpidstack: SceUID,
-    stacksize: SceSize,
+    size: t.SceSize,
+    mpidstack: t.SceUID,
+    stacksize: t.SceSize,
     priority: c_int,
     attribute: c_uint,
 };
 
 pub const SceKernelModuleInfo = extern struct {
-    size: SceSize,
+    size: t.SceSize,
     nsegment: u8,
     reserved: [3]u8,
     segmentaddr: [4]c_int,
@@ -69,7 +69,7 @@ pub const PSP_MEMORY_PARTITION_USER = 2;
 // @param option  - Pointer to a mod_param_t structure. Can be NULL.
 //
 // @return The UID of the loaded module on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelLoadModule(path: []const u8, flags: c_int, option: *SceKernelLMOption) SceUID;
+pub extern fn sceKernelLoadModule(path: []const u8, flags: c_int, option: *SceKernelLMOption) t.SceUID;
 
 // Load a module from MS.
 // @note This function restricts what it can load, e.g. it wont load plain executables.
@@ -79,7 +79,7 @@ pub extern fn sceKernelLoadModule(path: []const u8, flags: c_int, option: *SceKe
 // @param option  - Pointer to a mod_param_t structure. Can be NULL.
 //
 // @return The UID of the loaded module on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelLoadModuleMs(path: []const u8, flags: c_int, option: *SceKernelLMOption) SceUID;
+pub extern fn sceKernelLoadModuleMs(path: []const u8, flags: c_int, option: *SceKernelLMOption) t.SceUID;
 
 // Load a module from the given file UID.
 //
@@ -88,7 +88,7 @@ pub extern fn sceKernelLoadModuleMs(path: []const u8, flags: c_int, option: *Sce
 // @param option - Pointer to an optional ::SceKernelLMOption structure.
 //
 // @return The UID of the loaded module on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelLoadModuleByID(fid: SceUID, flags: c_int, option: *SceKernelLMOption) SceUID;
+pub extern fn sceKernelLoadModuleByID(fid: t.SceUID, flags: c_int, option: *SceKernelLMOption) t.SceUID;
 
 // Load a module from a buffer using the USB/WLAN API.
 //
@@ -101,7 +101,7 @@ pub extern fn sceKernelLoadModuleByID(fid: SceUID, flags: c_int, option: *SceKer
 // @param option - Pointer to an optional ::SceKernelLMOption structure.
 //
 // @return The UID of the loaded module on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelLoadModuleBufferUsbWlan(bufsize: SceSize, buf: ?*anyopaque, flags: c_int, option: *SceKernelLMOption) SceUID;
+pub extern fn sceKernelLoadModuleBufferUsbWlan(bufsize: t.SceSize, buf: ?*anyopaque, flags: c_int, option: *SceKernelLMOption) t.SceUID;
 
 // Start a loaded module.
 //
@@ -112,7 +112,7 @@ pub extern fn sceKernelLoadModuleBufferUsbWlan(bufsize: SceSize, buf: ?*anyopaqu
 // @param option - Pointer to an optional ::SceKernelSMOption structure.
 //
 // @return ??? on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelStartModule(modid: SceUID, argsize: SceSize, argp: ?*anyopaque, status: *c_int, option: *SceKernelSMOption) c_int;
+pub extern fn sceKernelStartModule(modid: t.SceUID, argsize: t.SceSize, argp: ?*anyopaque, status: *c_int, option: *SceKernelSMOption) c_int;
 
 // Stop a running module.
 //
@@ -123,14 +123,14 @@ pub extern fn sceKernelStartModule(modid: SceUID, argsize: SceSize, argp: ?*anyo
 // @param option - Pointer to an optional ::SceKernelSMOption structure.
 //
 // @return ??? on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelStopModule(modid: SceUID, argsize: SceSize, argp: ?*anyopaque, status: *c_int, option: *SceKernelSMOption) c_int;
+pub extern fn sceKernelStopModule(modid: t.SceUID, argsize: t.SceSize, argp: ?*anyopaque, status: *c_int, option: *SceKernelSMOption) c_int;
 
 // Unload a stopped module.
 //
 // @param modid - The UID of the module to unload.
 //
 // @return ??? on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelUnloadModule(modid: SceUID) c_int;
+pub extern fn sceKernelUnloadModule(modid: t.SceUID) c_int;
 
 // Stop and unload the current module.
 //
@@ -139,7 +139,7 @@ pub extern fn sceKernelUnloadModule(modid: SceUID) c_int;
 // @param argp - Pointer to arguments that will be passed to module_stop().
 //
 // @return ??? on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelSelfStopUnloadModule(unknown: c_int, argsize: SceSize, argp: ?*anyopaque) c_int;
+pub extern fn sceKernelSelfStopUnloadModule(unknown: c_int, argsize: t.SceSize, argp: ?*anyopaque) c_int;
 
 // Stop and unload the current module.
 //
@@ -149,7 +149,7 @@ pub extern fn sceKernelSelfStopUnloadModule(unknown: c_int, argsize: SceSize, ar
 // @param option - Pointer to an optional ::SceKernelSMOption structure.
 //
 // @return ??? on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelStopUnloadSelfModule(argsize: SceSize, argp: ?*anyopaque, status: *c_int, option: *SceKernelSMOption) c_int;
+pub extern fn sceKernelStopUnloadSelfModule(argsize: t.SceSize, argp: ?*anyopaque, status: *c_int, option: *SceKernelSMOption) c_int;
 
 // Query the information about a loaded module from its UID.
 // @note This fails on v1.0 firmware (and even it worked has a limited structure)
@@ -161,7 +161,7 @@ pub extern fn sceKernelStopUnloadSelfModule(argsize: SceSize, argp: ?*anyopaque,
 // @param info - Pointer to a ::SceKernelModuleInfo structure.
 //
 // @return 0 on success, otherwise one of ::PspKernelErrorCodes.
-pub extern fn sceKernelQueryModuleInfo(modid: SceUID, info: *SceKernelModuleInfo) c_int;
+pub extern fn sceKernelQueryModuleInfo(modid: t.SceUID, info: *SceKernelModuleInfo) c_int;
 
 // Get a list of module IDs. NOTE: This is only available on 1.5 firmware
 // and above. For V1 use ::pspSdkGetModuleIdList.
@@ -171,7 +171,7 @@ pub extern fn sceKernelQueryModuleInfo(modid: SceUID, info: *SceKernelModuleInfo
 // @param idcount - Returns the number of module ids
 //
 // @return >= 0 on success
-pub extern fn sceKernelGetModuleIdList(readbuf: *SceUID, readbufsize: c_int, idcount: *c_int) c_int;
+pub extern fn sceKernelGetModuleIdList(readbuf: *t.SceUID, readbufsize: c_int, idcount: *c_int) c_int;
 
 // Get the ID of the module occupying the address
 //

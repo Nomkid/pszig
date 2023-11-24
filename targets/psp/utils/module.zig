@@ -4,25 +4,29 @@ test {
     @import("std").meta.refAllDecls(@This());
 }
 
-usingnamespace @import("../sdk/loadexec.zig");
-usingnamespace @import("../sdk/threadman.zig");
-usingnamespace @import("../sdk/util/types.zig");
-usingnamespace @import("debug.zig");
+const loadexec = @import("../sdk/loadexec.zig");
+const threadman = @import("../sdk/threadman.zig");
+const t = @import("../sdk/util/types.zig");
+const debug = @import("debug.zig");
 
 const root = @import("root");
 
 //If there's an issue this is the internal exit (wait 10 seconds and exit).
 pub fn exitErr() void {
     //Hang for 10 seconds for error reporting
-    var stat = sceKernelDelayThread(10 * 1000 * 1000);
+    var stat = threadman.sceKernelDelayThread(10 * 1000 * 1000);
+    _ = stat;
     //Exit out.
-    sceKernelExitGame();
+    loadexec.sceKernelExitGame();
 }
+
+// General error message for a malformed return type
+const bad_main_ret = "expected return type of main to be 'void', '!void', 'noreturn', 'u8', or '!u8'";
 
 const has_std_os = if (@hasDecl(root, "os")) true else false;
 
 //This calls your main function as a thread.
-pub fn _module_main_thread(argc: SceSize, argv: ?*anyopaque) callconv(.C) c_int {
+pub fn _module_main_thread(argc: t.SceSize, argv: ?*anyopaque) callconv(.C) c_int {
     if (has_std_os) {
         pspos.system.__pspOsInit(argv);
     }
@@ -43,9 +47,9 @@ pub fn _module_main_thread(argc: SceSize, argv: ?*anyopaque) callconv(.C) c_int 
         },
         .ErrorUnion => {
             const result = root.main() catch |err| {
-                print("ERROR CAUGHT: ");
-                print(@errorName(err));
-                print("\nExiting in 10 seconds...");
+                debug.print("ERROR CAUGHT: ");
+                debug.print(@errorName(err));
+                debug.print("\nExiting in 10 seconds...");
 
                 exitErr();
                 return 1;
@@ -65,7 +69,7 @@ pub fn _module_main_thread(argc: SceSize, argv: ?*anyopaque) callconv(.C) c_int 
     }
 
     if (exitOnEnd) {
-        sceKernelExitGame();
+        loadexec.sceKernelExitGame();
     }
     return 0;
 }
@@ -195,8 +199,8 @@ pub fn module_info(comptime name: []const u8, comptime attrib: u16, comptime maj
 const pspos = @import("../pspos.zig");
 //Entry point - launches main through the thread above.
 pub export fn module_start(argc: c_uint, argv: ?*anyopaque) c_int {
-    var thid: SceUID = sceKernelCreateThread("zig_user_main", _module_main_thread, 0x20, 256 * 1024, 0b10000000000000000100000000000000, 0);
-    return sceKernelStartThread(thid, argc, argv);
+    var thid: t.t.SceUID = threadman.sceKernelCreateThread("zig_user_main", _module_main_thread, 0x20, 256 * 1024, 0b10000000000000000100000000000000, 0);
+    return threadman.sceKernelStartThread(thid, argc, argv);
 }
 
 // MIT License

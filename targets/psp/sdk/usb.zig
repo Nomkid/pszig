@@ -15,7 +15,7 @@ comptime {
     asm (macro.import_function("sceUsb", "0x1C360735", "sceUsbWaitCancel"));
 }
 
-usingnamespace @import("util/types.zig");
+const t = @import("util/types.zig");
 
 // Start a USB driver.
 //

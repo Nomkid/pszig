@@ -153,7 +153,7 @@ pub const struct_SceKernelSysClock = extern struct {
 };
 pub const SceKernelSysClock = struct_SceKernelSysClock;
 
-pub const enum_PspThreadAttributes = extern enum(u32) {
+pub const enum_PspThreadAttributes = enum(u32) {
     PSP_THREAD_ATTR_VFPU = 16384,
     PSP_THREAD_ATTR_USER = 2147483648,
     PSP_THREAD_ATTR_USBWLAN = 2684354560,

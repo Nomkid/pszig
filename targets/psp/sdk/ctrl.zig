@@ -22,7 +22,7 @@ comptime {
     asm (macro.import_function("sceCtrl", "0x687660FA", "sceCtrlGetIdleCancelThreshold"));
 }
 
-pub const PspCtrlButtons = extern enum(c_uint) {
+pub const PspCtrlButtons = enum(c_uint) {
     Select = 1,
     Start = 8,
     Up = 16,

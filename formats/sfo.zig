@@ -62,7 +62,23 @@ pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
     return Self{ .entries = entries };
 }
 
-pub fn writeFile(self: *Self, out_file: fs.File, allocator: mem.Allocator) !void {
+pub fn init(allocator: mem.Allocator) Self {
+    return Self{ .entries = EntryList.init(allocator) };
+}
+
+pub fn deinit(self: *Self) void {
+    for (self.entries.items) |item| {
+        self.entries.allocator.free(@as([]u8, @ptrCast(item.key)));
+        switch (item.data_format) {
+            .utf8s => self.entries.allocator.free(item.data.utf8s),
+            .utf8 => self.entries.allocator.free(@as([]u8, @ptrCast(item.data.utf8))),
+            .int32 => {},
+        }
+    }
+    self.entries.deinit();
+}
+
+pub fn write(self: *Self, out_writer: anytype, allocator: mem.Allocator) !void {
     var index_list = std.ArrayList(PackedIndexEntry).init(allocator);
     defer index_list.deinit();
     for (self.entries.items) |entry|
@@ -98,7 +114,6 @@ pub fn writeFile(self: *Self, out_file: fs.File, allocator: mem.Allocator) !void
         const writer = bytes.writer();
         for (index_list.items) |item|
             try writer.writeStruct(item);
-        // std.debug.print("{s}\n", .{std.fmt.fmtSliceHexUpper(mem.asBytes(&item))});
         for (self.entries.items) |item|
             try writer.writeAll(item.key);
         padding = bytes.items.len % 4;
@@ -110,7 +125,7 @@ pub fn writeFile(self: *Self, out_file: fs.File, allocator: mem.Allocator) !void
         };
     }
     {
-        const writer = out_file.writer();
+        const writer = out_writer;
         const num_entries = self.entries.items.len;
         const key_table_start = @sizeOf(PackedIndexEntry) * num_entries + @sizeOf(PackedHeader);
         var header = PackedHeader{
@@ -122,23 +137,13 @@ pub fn writeFile(self: *Self, out_file: fs.File, allocator: mem.Allocator) !void
         try writer.writeAll((&workaround)[0 .. workaround.len - 4]);
 
         var buffer = try bytes.toOwnedSlice();
-        // std.debug.print("{s}\n", .{std.fmt.fmtSliceHexUpper((&workaround)[0 .. workaround.len - 4])});
-        // std.debug.print("{s}\n", .{std.fmt.fmtSliceHexUpper(buffer)});
         defer allocator.free(buffer);
         try writer.writeAll(buffer);
     }
 }
 
-pub fn deinit(self: *Self) void {
-    for (self.entries.items) |item| {
-        self.entries.allocator.free(@as([]u8, @ptrCast(item.key)));
-        switch (item.data_format) {
-            .utf8s => self.entries.allocator.free(item.data.utf8s),
-            .utf8 => self.entries.allocator.free(@as([]u8, @ptrCast(item.data.utf8))),
-            .int32 => {},
-        }
-    }
-    self.entries.deinit();
+pub fn writeFile(self: *Self, out_file: fs.File, allocator: mem.Allocator) !void {
+    try self.write(out_file.writer(), allocator);
 }
 
 pub const EntryList = std.ArrayList(Entry);

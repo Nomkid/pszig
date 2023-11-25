@@ -45,18 +45,18 @@ pub fn unpack(argerator: *std.process.ArgIterator) !void {
         var dir = try fs.cwd().makeOpenPath(out_path, .{});
         defer dir.close();
 
-        try writeLoop(&file, parsed.offsets.param_sfo, &dir, "PARAM.SFO");
-        try writeLoop(&file, parsed.offsets.icon0_png, &dir, "ICON0.PNG");
-        try writeLoop(&file, parsed.offsets.icon1_pmf, &dir, "ICON1.PMF");
-        try writeLoop(&file, parsed.offsets.pic0_png, &dir, "PIC0.PNG");
-        try writeLoop(&file, parsed.offsets.pic1_png, &dir, "PIC1.PNG");
-        try writeLoop(&file, parsed.offsets.snd0_at3, &dir, "SND0.AT3");
-        try writeLoop(&file, parsed.offsets.data_psp, &dir, "DATA.PSP");
-        try writeLoop(&file, parsed.offsets.data_psar, &dir, "DATA.PSAR");
+        try writeLoop(&file, parsed.files.param_sfo, &dir, "PARAM.SFO");
+        try writeLoop(&file, parsed.files.icon0_png, &dir, "ICON0.PNG");
+        try writeLoop(&file, parsed.files.icon1_pmf, &dir, "ICON1.PMF");
+        try writeLoop(&file, parsed.files.pic0_png, &dir, "PIC0.PNG");
+        try writeLoop(&file, parsed.files.pic1_png, &dir, "PIC1.PNG");
+        try writeLoop(&file, parsed.files.snd0_at3, &dir, "SND0.AT3");
+        try writeLoop(&file, parsed.files.data_psp, &dir, "DATA.PSP");
+        try writeLoop(&file, parsed.files.data_psar, &dir, "DATA.PSAR");
     } else return error.NoInputPath;
 }
 
-fn writeLoop(in_file: *fs.File, offset: pbp.FileOffsetHeader.Offset, out_dir: *fs.Dir, out_path: []const u8) !void {
+fn writeLoop(in_file: *fs.File, offset: pbp.FileList.Offset, out_dir: *fs.Dir, out_path: []const u8) !void {
     if (offset.start) |o| try in_file.seekTo(@intCast(o)) else return;
     var out_file = try out_dir.createFile(out_path, .{});
     defer out_file.close();

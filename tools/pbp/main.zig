@@ -1,4 +1,5 @@
 const std = @import("std");
+const mem = std.mem;
 const fs = std.fs;
 const io = std.io;
 const pbp = @import("pbp");
@@ -22,7 +23,7 @@ pub fn main() !void {
     _ = argerator.skip();
     if (argerator.next()) |cmd| {
         if (std.mem.eql(u8, cmd, "unpack")) {
-            unpack(&argerator) catch |err| if (err == error.NoInputPath)
+            unpack(&argerator, allocator) catch |err| if (err == error.NoInputPath)
                 std.log.err("No input path (Usage: unpack input.pbp <output_dir/>)", .{})
             else
                 return err;
@@ -34,12 +35,12 @@ pub fn main() !void {
 
 const buf_size = 512;
 
-pub fn unpack(argerator: *std.process.ArgIterator) !void {
+pub fn unpack(argerator: *std.process.ArgIterator, allocator: mem.Allocator) !void {
     if (argerator.next()) |path| {
         var file = try fs.cwd().openFile(path, .{});
         defer file.close();
 
-        const parsed = try pbp.loadFile(file);
+        const parsed = try pbp.loadFile(file, allocator);
         const out_path = if (argerator.next()) |out| out else fs.path.basename(path);
 
         var dir = try fs.cwd().makeOpenPath(out_path, .{});

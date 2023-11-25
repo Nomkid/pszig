@@ -59,7 +59,7 @@ pub fn build(b: *Build, options: Options, sfo_options: SFOOptions) !void {
     try param_sfo.write(param_sfo_bytes.writer(), b.allocator);
     var param_sfo_buf = try param_sfo_bytes.toOwnedSlice();
 
-    const eboot_step = MakeEboot.create(b, .{ .name = "EBOOT.PBP" });
+    const eboot_step = PBP.MakePBP.create(b, .{ .name = "EBOOT.PBP" });
     var param_sfo_file = try b.allocator.create(PBP.FileList.File);
     var icon0_png_file = try b.allocator.create(PBP.FileList.File);
     var data_psp_file = try b.allocator.create(PBP.FileList.File);
@@ -72,45 +72,3 @@ pub fn build(b: *Build, options: Options, sfo_options: SFOOptions) !void {
     eboot_step.step.dependOn(&exe.step);
     b.getInstallStep().dependOn(&eboot_step.step);
 }
-
-pub const MakeEboot = struct {
-    step: Step,
-    pbp: PBP,
-
-    name: []const u8,
-
-    pub const EbootOptions = struct {
-        name: []const u8,
-    };
-
-    pub fn create(owner: *Build, options: EbootOptions) *MakeEboot {
-        const step_name = owner.fmt("{s} {s}", .{ "MakeEboot", owner.dupe(options.name) });
-
-        const self = owner.allocator.create(MakeEboot) catch @panic("OOM");
-        self.* = .{
-            .step = Step.init(.{
-                .id = .write_file,
-                .name = step_name,
-                .owner = owner,
-                .makeFn = make,
-                .max_rss = 0,
-            }),
-            .pbp = PBP.init(),
-            .name = options.name,
-        };
-
-        return self;
-    }
-
-    pub fn make(step: *Step, prog_node: *std.Progress.Node) !void {
-        _ = prog_node;
-        const b = step.owner;
-        const self = @fieldParentPtr(MakeEboot, "step", step);
-
-        var out_path = [_][]const u8{ b.install_path, self.name };
-        var out_file = try fs.openFileAbsolute(try fs.path.join(b.allocator, &out_path), .{});
-        defer out_file.close();
-
-        try self.pbp.write(out_file.writer(), b.allocator);
-    }
-};

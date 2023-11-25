@@ -2,11 +2,11 @@ const std = @import("std");
 const mem = std.mem;
 const io = std.io;
 const fs = std.fs;
-const Self = @This();
+const SFO = @This();
 
 entries: EntryList,
 
-pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
+pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !SFO {
     var entries = EntryList.init(allocator);
     errdefer entries.deinit();
 
@@ -59,14 +59,14 @@ pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !Self {
         });
     }
 
-    return Self{ .entries = entries };
+    return SFO{ .entries = entries };
 }
 
-pub fn init(allocator: mem.Allocator) Self {
-    return Self{ .entries = EntryList.init(allocator) };
+pub fn init(allocator: mem.Allocator) SFO {
+    return SFO{ .entries = EntryList.init(allocator) };
 }
 
-pub fn deinit(self: *Self) void {
+pub fn deinit(self: *SFO) void {
     for (self.entries.items) |item| {
         self.entries.allocator.free(@as([]u8, @ptrCast(item.key)));
         switch (item.data_format) {
@@ -78,7 +78,7 @@ pub fn deinit(self: *Self) void {
     self.entries.deinit();
 }
 
-pub fn write(self: *Self, out_writer: anytype, allocator: mem.Allocator) !void {
+pub fn write(self: *SFO, out_writer: anytype, allocator: mem.Allocator) !void {
     var index_list = std.ArrayList(PackedIndexEntry).init(allocator);
     defer index_list.deinit();
     for (self.entries.items) |entry|
@@ -142,7 +142,7 @@ pub fn write(self: *Self, out_writer: anytype, allocator: mem.Allocator) !void {
     }
 }
 
-pub fn writeFile(self: *Self, out_file: fs.File, allocator: mem.Allocator) !void {
+pub fn writeFile(self: *SFO, out_file: fs.File, allocator: mem.Allocator) !void {
     try self.write(out_file.writer(), allocator);
 }
 
@@ -182,12 +182,77 @@ pub const PackedIndexEntry = packed struct {
     data_offset: u32,
 };
 
-test {
-    var in_file = try fs.cwd().openFile("test/PKGI/EBOOT/PARAM.SFO", .{});
-    defer in_file.close();
-    var out_file = try fs.cwd().createFile("test/PKGI/EBOOT/TEST.SFO", .{});
-    defer out_file.close();
-    var parsed = try loadFile(in_file, std.testing.allocator);
-    defer parsed.deinit();
-    try parsed.writeFile(out_file, std.testing.allocator);
-}
+const Build = std.Build;
+const Step = Build.Step;
+
+pub const MakeSFO = struct {
+    step: Step,
+    sfo: SFO,
+
+    title: []const u8,
+    disc_id: []const u8,
+    disc_version: []const u8,
+    version: []const u8,
+    psp_system_ver: []const u8,
+    category: []const u8,
+    parental_level: u32,
+    region: u32,
+    memsize: u32,
+
+    pub const Options = struct {
+        title: []const u8,
+        disc_id: []const u8,
+        disc_version: []const u8 = "1.00",
+        version: []const u8 = "1.00",
+        psp_system_ver: []const u8 = "1.00",
+        category: []const u8 = "MG",
+        parental_level: u32 = 1,
+        region: u32 = 32768,
+        memsize: u32 = 1,
+    };
+
+    pub fn create(owner: *Build, options: Options) *MakeSFO {
+        const self = try owner.allocator.create(MakeSFO);
+        self.* = .{
+            .step = Step.init(.{
+                .id = .write_file,
+                .name = "MakeSFO",
+                .owner = owner,
+                .makeFn = make,
+                .max_rss = 0,
+            }),
+            .title = options.title,
+            .disc_id = options.disc_id,
+            .disc_version = options.disc_version,
+            .version = options.version,
+            .psp_system_ver = options.psp_system_ver,
+            .category = options.category,
+            .parental_level = options.parental_level,
+            .region = options.region,
+            .memsize = options.memsize,
+        };
+        return self;
+    }
+
+    pub fn make(step: *Step, prog_node: *std.Progress.Node) !void {
+        _ = prog_node;
+        const b = step.owner;
+        const self = @fieldParentPtr(MakeSFO, "step", step);
+
+        var out_path = [_][]const u8{ b.install_path, self.name };
+        var out_file = try fs.openFileAbsolute(try fs.path.join(b.allocator, &out_path), .{});
+        defer out_file.close();
+
+        try self.sfo.write(out_file.writer(), b.allocator);
+    }
+};
+
+// test {
+//     var in_file = try fs.cwd().openFile("test/PKGI/EBOOT/PARAM.SFO", .{});
+//     defer in_file.close();
+//     var out_file = try fs.cwd().createFile("test/PKGI/EBOOT/TEST.SFO", .{});
+//     defer out_file.close();
+//     var parsed = try loadFile(in_file, std.testing.allocator);
+//     defer parsed.deinit();
+//     try parsed.writeFile(out_file, std.testing.allocator);
+// }

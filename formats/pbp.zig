@@ -2,40 +2,103 @@ const std = @import("std");
 const mem = std.mem;
 const io = std.io;
 const fs = std.fs;
-const Self = @This();
+const PBP = @This();
 
-files: FileList,
+param_sfo: ?File,
+icon0_png: ?File,
+icon1_pmf: ?File,
+pic0_png: ?File,
+pic1_png: ?File,
+snd0_at3: ?File,
+data_psp: ?File,
+data_psar: ?File,
 
-pub fn loadFile(file: fs.File) !Self {
+pub fn loadFile(file: fs.File, allocator: mem.Allocator) !PBP {
+    _ = allocator;
     if (try file.reader().readInt(u32, .big) != Magic) return error.InvalidMagic;
     if (try file.reader().readInt(u32, .big) != Version) return error.InvalidVersion;
 
-    var param_sfo = try file.reader().readInt(u32, .little);
-    var icon0_png = try file.reader().readInt(u32, .little);
-    var icon1_pmf = try file.reader().readInt(u32, .little);
-    var pic0_png = try file.reader().readInt(u32, .little);
-    var pic1_png = try file.reader().readInt(u32, .little);
-    var snd0_at3 = try file.reader().readInt(u32, .little);
-    var data_psp = try file.reader().readInt(u32, .little);
-    var data_psar = try file.reader().readInt(u32, .little);
+    var param_sfo_start = try file.reader().readInt(u32, .little);
+    var icon0_png_start = try file.reader().readInt(u32, .little);
+    var icon1_pmf_start = try file.reader().readInt(u32, .little);
+    var pic0_png_start = try file.reader().readInt(u32, .little);
+    var pic1_png_start = try file.reader().readInt(u32, .little);
+    var snd0_at3_start = try file.reader().readInt(u32, .little);
+    var data_psp_start = try file.reader().readInt(u32, .little);
+    var data_psar_start = try file.reader().readInt(u32, .little);
 
     const file_size = try file.getEndPos();
-    return Self{
-        .files = FileList{
-            .param_sfo = .{ .len = icon0_png - param_sfo, .start = param_sfo },
-            .icon0_png = .{ .len = icon1_pmf - icon0_png, .start = if (icon0_png != param_sfo) icon0_png else null },
-            .icon1_pmf = .{ .len = pic0_png - icon1_pmf, .start = if (icon1_pmf != pic0_png) icon1_pmf else null },
-            .pic0_png = .{ .len = pic1_png - pic0_png, .start = if (pic0_png != pic1_png) pic0_png else null },
-            .pic1_png = .{ .len = snd0_at3 - pic1_png, .start = if (pic1_png != snd0_at3) pic1_png else null },
-            .snd0_at3 = .{ .len = data_psp - snd0_at3, .start = if (snd0_at3 != data_psp) snd0_at3 else null },
-            .data_psp = .{ .len = data_psar - data_psp, .start = if (data_psp != data_psar) data_psp else null },
-            .data_psar = .{ .len = @as(u32, @truncate(file_size)) - data_psar, .start = if (data_psar != file_size) data_psar else null },
+    var param_sfo = File{
+        .offset = .{
+            .len = icon0_png_start - param_sfo_start,
+            .start = param_sfo_start,
         },
+        .data = undefined,
+    };
+    var icon0_png = File{
+        .offset = .{
+            .len = icon1_pmf_start - icon0_png_start,
+            .start = if (icon0_png_start != param_sfo_start) icon0_png_start else null,
+        },
+        .data = undefined,
+    };
+    var icon1_pmf = File{
+        .offset = .{
+            .len = pic0_png_start - icon1_pmf_start,
+            .start = if (icon1_pmf_start != pic0_png_start) icon1_pmf_start else null,
+        },
+        .data = undefined,
+    };
+    var pic0_png = File{
+        .offset = .{
+            .len = pic1_png_start - pic0_png_start,
+            .start = if (pic0_png_start != pic1_png_start) pic0_png_start else null,
+        },
+        .data = undefined,
+    };
+    var pic1_png = File{
+        .offset = .{
+            .len = snd0_at3_start - pic1_png_start,
+            .start = if (pic1_png_start != snd0_at3_start) pic1_png_start else null,
+        },
+        .data = undefined,
+    };
+    var snd0_at3 = File{
+        .offset = .{
+            .len = data_psp_start - snd0_at3_start,
+            .start = if (snd0_at3_start != data_psp_start) snd0_at3_start else null,
+        },
+        .data = undefined,
+    };
+    var data_psp = File{
+        .offset = .{
+            .len = data_psar_start - data_psp_start,
+            .start = if (data_psp_start != data_psar_start) data_psp_start else null,
+        },
+        .data = undefined,
+    };
+    var data_psar = File{
+        .offset = .{
+            .len = @as(u32, @truncate(file_size)) - data_psar_start,
+            .start = if (data_psar_start != file_size) data_psar_start else null,
+        },
+        .data = undefined,
+    };
+
+    return PBP{
+        .param_sfo = if (param_sfo.offset.?.len > 0) param_sfo else null,
+        .icon0_png = if (icon0_png.offset.?.len > 0) icon0_png else null,
+        .icon1_pmf = if (icon1_pmf.offset.?.len > 0) icon1_pmf else null,
+        .pic0_png = if (pic0_png.offset.?.len > 0) pic0_png else null,
+        .pic1_png = if (pic1_png.offset.?.len > 0) pic1_png else null,
+        .snd0_at3 = if (snd0_at3.offset.?.len > 0) snd0_at3 else null,
+        .data_psp = if (data_psp.offset.?.len > 0) data_psp else null,
+        .data_psar = if (data_psar.offset.?.len > 0) data_psar else null,
     };
 }
 
-pub fn init() Self {
-    return Self{ .files = .{
+pub fn init() PBP {
+    return PBP{
         .param_sfo = null,
         .icon0_png = null,
         .icon1_pmf = null,
@@ -44,10 +107,10 @@ pub fn init() Self {
         .snd0_at3 = null,
         .data_psp = null,
         .data_psar = null,
-    } };
+    };
 }
 
-pub fn write(self: *Self, out_writer: anytype, allocator: mem.Allocator) !void {
+pub fn write(self: *PBP, out_writer: anytype, allocator: mem.Allocator) !void {
     var bytes = std.ArrayList(u8).init(allocator);
     errdefer bytes.deinit();
 
@@ -56,13 +119,13 @@ pub fn write(self: *Self, out_writer: anytype, allocator: mem.Allocator) !void {
     for (names) |name| if (self.getFile(name)) |file| {
         switch (file.data) {
             .buf => {
-                var offset: FileList.File.Offset = undefined;
+                var offset: File.Offset = undefined;
                 offset.start = @intCast(@sizeOf(PackedHeader) + 0x20 + bytes.items.len);
                 try bytes.appendSlice(file.data.buf);
                 offset.len = @intCast(file.data.buf.len);
                 file.offset = offset;
             },
-            .path => {
+            .buildtime_path => {
                 var fi = try fs.cwd().openFile(file.data.path.lazy.getPath(file.data.path.b), .{});
                 defer fi.close();
                 var reader = io.bufferedReader(fi.reader());
@@ -73,6 +136,7 @@ pub fn write(self: *Self, out_writer: anytype, allocator: mem.Allocator) !void {
                     std.debug.print("error: {s}\n", .{@errorName(err)});
                 }
             },
+            .packed_path => return error.WritePackedPath, // TODO: handle this with properness
         }
         if (file.offset) |offset|
             try out_writer.writeInt(u32, offset.start, .little)
@@ -85,51 +149,33 @@ pub fn write(self: *Self, out_writer: anytype, allocator: mem.Allocator) !void {
     try out_writer.writeAll(buffer);
 }
 
-pub fn hasFile(self: *Self, name: FileName) bool {
+pub fn hasFile(self: *PBP, name: FileName) bool {
     return self.getFile(name) != null;
 }
 
-// pub fn setFileBuf(self: *Self, name: FileName, buf: []u8) void {
-//     if (self.getFile(name)) |file|
-//         file.data.buf = buf
-//     else {
-//         var file = FileList.File{ .data = .{ .buf = buf } };
-//         self.addFile(name, &file);
-//     }
-// }
-
-// pub fn setFilePath(self: *Self, name: FileName, path: std.Build.LazyPath) void {
-//     if (self.getFile(name)) |file|
-//         file.data.path = path
-//     else {
-//         var file = FileList.File{ .data = .{ .path = path } };
-//         self.addFile(name, &file);
-//     }
-// }
-
-pub fn addFile(self: *Self, name: FileName, file: *FileList.File) void {
+pub fn addFile(self: *PBP, name: FileName, file: File) void {
     switch (name) {
-        .param_sfo => self.files.param_sfo = file,
-        .icon0_png => self.files.icon0_png = file,
-        .icon1_pmf => self.files.icon1_pmf = file,
-        .pic0_png => self.files.pic0_png = file,
-        .pic1_png => self.files.pic1_png = file,
-        .snd0_at3 => self.files.snd0_at3 = file,
-        .data_psp => self.files.data_psp = file,
-        .data_psar => self.files.data_psar = file,
+        .param_sfo => self.param_sfo = file,
+        .icon0_png => self.icon0_png = file,
+        .icon1_pmf => self.icon1_pmf = file,
+        .pic0_png => self.pic0_png = file,
+        .pic1_png => self.pic1_png = file,
+        .snd0_at3 => self.snd0_at3 = file,
+        .data_psp => self.data_psp = file,
+        .data_psar => self.data_psar = file,
     }
 }
 
-pub fn getFile(self: *Self, name: FileName) ?*FileList.File {
+pub fn getFile(self: *PBP, name: FileName) ?File {
     return switch (name) {
-        .param_sfo => self.files.param_sfo,
-        .icon0_png => self.files.icon0_png,
-        .icon1_pmf => self.files.icon1_pmf,
-        .pic0_png => self.files.pic0_png,
-        .pic1_png => self.files.pic1_png,
-        .snd0_at3 => self.files.snd0_at3,
-        .data_psp => self.files.data_psp,
-        .data_psar => self.files.data_psar,
+        .param_sfo => self.param_sfo,
+        .icon0_png => self.icon0_png,
+        .icon1_pmf => self.icon1_pmf,
+        .pic0_png => self.pic0_png,
+        .pic1_png => self.pic1_png,
+        .snd0_at3 => self.snd0_at3,
+        .data_psp => self.data_psp,
+        .data_psar => self.data_psar,
     };
 }
 
@@ -143,35 +189,70 @@ pub const FileName = enum {
     data_psp,
     data_psar,
 };
-pub const FileList = struct {
-    param_sfo: ?*File,
-    icon0_png: ?*File,
-    icon1_pmf: ?*File,
-    pic0_png: ?*File,
-    pic1_png: ?*File,
-    snd0_at3: ?*File,
-    data_psp: ?*File,
-    data_psar: ?*File,
+pub const File = struct {
+    data: Data,
+    offset: ?Offset = null,
 
-    pub const File = struct {
-        data: Data,
-        offset: ?Offset = null,
-
-        pub const Data = union(Type) {
-            buf: []u8,
-            path: struct { lazy: std.Build.LazyPath, b: *std.Build },
-        };
-        pub const Type = enum { buf, path };
-        pub const Offset = struct {
-            start: u32,
-            len: u32,
-        };
+    pub const Data = union(Type) {
+        buf: []u8,
+        packed_path: []const u8,
+        buildtime_path: struct { lazy: std.Build.LazyPath, b: *std.Build },
+    };
+    pub const Type = enum { buf, packed_path, buildtime_path };
+    pub const Offset = struct {
+        start: u32,
+        len: u32,
     };
 };
 
-const Magic = 0x50425000; //0x00504250;
-const Version = 0x00010000; //0x00000100;
+const Magic = 0x50425000;
+const Version = 0x00010000;
 pub const PackedHeader = packed struct {
     magic: u32 = Magic,
     version: u32 = Version,
+};
+
+const Build = std.Build;
+const Step = Build.Step;
+
+pub const MakePBP = struct {
+    step: Step,
+    pbp: PBP,
+
+    name: []const u8,
+
+    pub const EbootOptions = struct {
+        name: []const u8,
+    };
+
+    pub fn create(owner: *Build, options: EbootOptions) *MakePBP {
+        const step_name = owner.fmt("{s} {s}", .{ "MakeEboot", owner.dupe(options.name) });
+
+        const self = owner.allocator.create(MakePBP) catch @panic("OOM");
+        self.* = .{
+            .step = Step.init(.{
+                .id = .write_file,
+                .name = step_name,
+                .owner = owner,
+                .makeFn = make,
+                .max_rss = 0,
+            }),
+            .pbp = PBP.init(),
+            .name = options.name,
+        };
+
+        return self;
+    }
+
+    pub fn make(step: *Step, prog_node: *std.Progress.Node) !void {
+        _ = prog_node;
+        const b = step.owner;
+        const self = @fieldParentPtr(MakePBP, "step", step);
+
+        var out_path = [_][]const u8{ b.install_path, self.name };
+        var out_file = try fs.openFileAbsolute(try fs.path.join(b.allocator, &out_path), .{});
+        defer out_file.close();
+
+        try self.pbp.write(out_file.writer(), b.allocator);
+    }
 };

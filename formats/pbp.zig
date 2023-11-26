@@ -28,62 +28,38 @@ pub fn loadFile(file: fs.File, allocator: mem.Allocator) !PBP {
     var data_psar_start = try file.reader().readInt(u32, .little);
 
     const file_size = try file.getEndPos();
-    var param_sfo = File{
-        .offset = .{
-            .len = icon0_png_start - param_sfo_start,
-            .start = param_sfo_start,
-        },
-        .data = undefined,
-    };
-    var icon0_png = File{
-        .offset = .{
-            .len = icon1_pmf_start - icon0_png_start,
-            .start = if (icon0_png_start != param_sfo_start) icon0_png_start else null,
-        },
-        .data = undefined,
-    };
-    var icon1_pmf = File{
-        .offset = .{
-            .len = pic0_png_start - icon1_pmf_start,
-            .start = if (icon1_pmf_start != pic0_png_start) icon1_pmf_start else null,
-        },
-        .data = undefined,
-    };
-    var pic0_png = File{
-        .offset = .{
-            .len = pic1_png_start - pic0_png_start,
-            .start = if (pic0_png_start != pic1_png_start) pic0_png_start else null,
-        },
-        .data = undefined,
-    };
-    var pic1_png = File{
-        .offset = .{
-            .len = snd0_at3_start - pic1_png_start,
-            .start = if (pic1_png_start != snd0_at3_start) pic1_png_start else null,
-        },
-        .data = undefined,
-    };
-    var snd0_at3 = File{
-        .offset = .{
-            .len = data_psp_start - snd0_at3_start,
-            .start = if (snd0_at3_start != data_psp_start) snd0_at3_start else null,
-        },
-        .data = undefined,
-    };
-    var data_psp = File{
-        .offset = .{
-            .len = data_psar_start - data_psp_start,
-            .start = if (data_psp_start != data_psar_start) data_psp_start else null,
-        },
-        .data = undefined,
-    };
-    var data_psar = File{
-        .offset = .{
-            .len = @as(u32, @truncate(file_size)) - data_psar_start,
-            .start = if (data_psar_start != file_size) data_psar_start else null,
-        },
-        .data = undefined,
-    };
+    var param_sfo = File{ .offset = .{
+        .len = icon0_png_start - param_sfo_start,
+        .start = param_sfo_start,
+    }, .data = undefined };
+    var icon0_png = File{ .offset = .{
+        .len = icon1_pmf_start - icon0_png_start,
+        .start = if (icon0_png_start != param_sfo_start) icon0_png_start else 0,
+    }, .data = undefined };
+    var icon1_pmf = File{ .offset = .{
+        .len = pic0_png_start - icon1_pmf_start,
+        .start = if (icon1_pmf_start != pic0_png_start) icon1_pmf_start else 0,
+    }, .data = undefined };
+    var pic0_png = File{ .offset = .{
+        .len = pic1_png_start - pic0_png_start,
+        .start = if (pic0_png_start != pic1_png_start) pic0_png_start else 0,
+    }, .data = undefined };
+    var pic1_png = File{ .offset = .{
+        .len = snd0_at3_start - pic1_png_start,
+        .start = if (pic1_png_start != snd0_at3_start) pic1_png_start else 0,
+    }, .data = undefined };
+    var snd0_at3 = File{ .offset = .{
+        .len = data_psp_start - snd0_at3_start,
+        .start = if (snd0_at3_start != data_psp_start) snd0_at3_start else 0,
+    }, .data = undefined };
+    var data_psp = File{ .offset = .{
+        .len = data_psar_start - data_psp_start,
+        .start = if (data_psp_start != data_psar_start) data_psp_start else 0,
+    }, .data = undefined };
+    var data_psar = File{ .offset = .{
+        .len = @as(u32, @truncate(file_size)) - data_psar_start,
+        .start = if (data_psar_start != file_size) data_psar_start else 0,
+    }, .data = undefined };
 
     return PBP{
         .param_sfo = if (param_sfo.offset.?.len > 0) param_sfo else null,

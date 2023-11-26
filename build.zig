@@ -10,7 +10,7 @@ const native_bare_minimum = @import("examples/native-bare-minimum/build-example.
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-    pbptool.step(b, .{ .target = target, .optimize = optimize });
+    // pbptool.step(b, .{ .target = target, .optimize = optimize });
     sfotool.step(b, .{ .target = target, .optimize = optimize });
     try native_bare_minimum.step(b);
 }

@@ -1,6 +1,6 @@
 // License details can be found at the bottom of this file.
 
-const macro = @import("./macros.zig");
+const macro = @import("../macros.zig");
 
 comptime {
     asm (macro.import_module_start("sceAudiocodec", "0x40090000", "8"));

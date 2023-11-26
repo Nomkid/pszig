@@ -165,6 +165,9 @@ pub fn atracDecodeData(atracID: u32, outSamples: []u16, outN: []i32, outEnd: []i
 pub extern fn sceAtracGetRemainFrame(atracID: u32, outRemainFrame: [*c]c_int) c_int;
 
 pub fn atracGetRemainFrame(atracID: u32, outRemainFrame: []i32) !void {
+    var outSamples: [1]u16 = undefined; // TODO: fix stub
+    var outN: [1]c_int = undefined; // TODO: fix stub
+    var outEnd: [1]c_int = undefined; // TODO: fix stub
     var res = sceAtracDecodeData(atracID, outSamples, outN, outEnd, outRemainFrame);
     try intToError(res);
 }

@@ -27,7 +27,7 @@ export fn cbThread(args: t.SceSize, argp: ?*anyopaque) c_int {
     _ = args;
     var cbID: i32 = -1;
 
-    cbID = loadexec.sceKernelCreateCallback("zig_exit_callback", exitCB, null);
+    cbID = threadman.sceKernelCreateCallback("zig_exit_callback", &exitCB, null);
     var status = loadexec.sceKernelRegisterExitCallback(cbID);
 
     if (status < 0) {

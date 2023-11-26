@@ -34,6 +34,7 @@ comptime {
 
 const t = @import("util/types.zig");
 
+pub const time_t = u32; // TODO: verify
 pub const clock_t = u32;
 pub const suseconds_t = u32;
 pub const timeval = extern struct {

@@ -1,5 +1,11 @@
 // License details can be found at the bottom of this file.
 
+// TODO: fix here stubs
+const vu8 = u8;
+const vu16 = u16;
+const vu32 = u32;
+const vu64 = u64;
+
 pub fn _lb(arg_addr: u32) callconv(.C) u8 {
     var addr = arg_addr;
     return @as([*c]volatile vu8, @ptrFromInt(addr)).?.*;

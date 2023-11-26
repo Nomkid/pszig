@@ -163,7 +163,7 @@ pub const enum_PspThreadAttributes = enum(u32) {
     PSP_THREAD_ATTR_CLEAR_STACK = 2097152,
     _,
 };
-pub const SceKernelThreadEntry = ?fn (t.SceSize, ?*anyopaque) callconv(.C) c_int;
+pub const SceKernelThreadEntry = ?*const fn (t.SceSize, ?*anyopaque) callconv(.C) c_int;
 pub const struct_SceKernelThreadOptParam = extern struct {
     size: t.SceSize,
     stackMpid: t.SceUID,
@@ -334,7 +334,7 @@ pub extern fn sceKernelSetAlarm(clock: t.SceUInt, handler: SceKernelAlarmHandler
 pub extern fn sceKernelSetSysClockAlarm(clock: [*c]SceKernelSysClock, handler: SceKernelAlarmHandler, common: ?*anyopaque) t.SceUID;
 pub extern fn sceKernelCancelAlarm(alarmid: t.SceUID) c_int;
 pub extern fn sceKernelReferAlarmStatus(alarmid: t.SceUID, info: [*c]SceKernelAlarmInfo) c_int;
-pub const SceKernelCallbackFunction = ?fn (c_int, c_int, ?*anyopaque) callconv(.C) c_int;
+pub const SceKernelCallbackFunction = ?*const fn (c_int, c_int, ?*anyopaque) callconv(.C) c_int;
 pub const struct_SceKernelCallbackInfo = extern struct {
     size: t.SceSize,
     name: [32]u8,
@@ -513,6 +513,9 @@ pub extern fn sceKernelReferThreadEventHandlerStatus(uid: t.SceUID, info: [*c]st
 pub extern fn sceKernelReferThreadProfiler() [*c]PspDebugProfilerRegs;
 pub extern fn sceKernelReferGlobalProfiler() [*c]PspDebugProfilerRegs;
 pub extern fn sceKernelCreateThread(name: [*c]const u8, entry: SceKernelThreadEntry, initPriority: c_int, stackSize: c_int, attr: t.SceUInt, option: [*c]SceKernelThreadOptParam) t.SceUID;
+
+pub const PspDebugProfilerRegs = extern struct {}; // TODO: fix stub
+pub const enum_PspModuleInfoAttr = enum(c_int) {}; // TODO: fix stub
 
 pub const PspModuleInfoAttr = enum_PspModuleInfoAttr;
 pub const PspThreadAttributes = enum_PspThreadAttributes;

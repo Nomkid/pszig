@@ -79,8 +79,8 @@ pub fn screenInit() void {
 
     vram_base = @as(?[*]u32, @ptrFromInt(0x40000000 | @intFromPtr(ge.sceGeEdramGetAddr())));
 
-    _ = ge.sceDisplaySetMode(0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    _ = ge.sceDisplaySetFrameBuf(vram_base, SCR_BUF_WIDTH, @intFromEnum(display.PspDisplayPixelFormats.Format8888), 1);
+    _ = display.sceDisplaySetMode(0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    _ = display.sceDisplaySetFrameBuf(vram_base, SCR_BUF_WIDTH, @intFromEnum(display.PspDisplayPixelFormats.Format8888), 1);
 
     screenClear();
 }
@@ -120,7 +120,7 @@ export fn pspDebugScreenClear(color: u32) void {
 }
 
 export fn pspDebugScreenPrint(text: [*c]const u8) void {
-    print(std.mem.spanZ(text));
+    print(std.mem.span(text));
 }
 
 const std = @import("std");

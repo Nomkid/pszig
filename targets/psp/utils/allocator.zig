@@ -5,9 +5,9 @@ const mem = std.mem;
 const debug = std.debug;
 const assert = debug.assert;
 
-usingnamespace @import("../sdk/util/types.zig");
-usingnamespace @import("../sdk/sysmem.zig");
-usingnamespace @import("../sdk/loadexec.zig");
+pub const t = @import("../sdk/util/types.zig");
+pub const sysmem = @import("../sdk/sysmem.zig");
+pub const loadexec = @import("../sdk/loadexec.zig");
 
 const Allocator = mem.Allocator;
 
@@ -29,6 +29,9 @@ pub const PSPAllocator = struct {
 
     //Our Allocator
     fn psp_realloc(allocator: *Allocator, len: usize, alignment: u29, len_align: u29, ra: usize) std.mem.Allocator.Error![]u8 {
+        _ = ra;
+        _ = len_align;
+        _ = allocator;
         //Assume alignment is less than double aligns
         assert(len > 0);
         assert(alignment <= @alignOf(c_longdouble));
@@ -37,7 +40,7 @@ pub const PSPAllocator = struct {
         if (len > 0) {
 
             //Gets a block of memory
-            var id: t.SceUID = sceKernelAllocPartitionMemory(2, "block", @intFromEnum(PspSysMemBlockTypes.MemLow), len + @sizeOf(t.SceUID), null);
+            var id: t.SceUID = sysmem.sceKernelAllocPartitionMemory(2, "block", @intFromEnum(t.PspSysMemBlockTypes.MemLow), len + @sizeOf(t.SceUID), null);
 
             if (id < 0) {
                 //TODO: Handle error cases that aren't out of memory...
@@ -45,7 +48,7 @@ pub const PSPAllocator = struct {
             }
 
             //Get the head address
-            var ptr = @as([*]u32, @ptrCast(@alignCast(4, sceKernelGetBlockHeadAddr(id))));
+            var ptr = @as([*]align(4) u32, @ptrCast(@alignCast(sysmem.sceKernelGetBlockHeadAddr(id))));
 
             //Store our ID to free
             @as(*c_int, @ptrCast(ptr)).* = id;
@@ -62,16 +65,22 @@ pub const PSPAllocator = struct {
 
     //Our de-allocator
     fn psp_shrink(allocator: *Allocator, buf_unaligned: []u8, buf_align: u29, new_size: usize, len_align: u29, return_address: usize) std.mem.Allocator.Error!usize {
+        _ = return_address;
+        _ = len_align;
+        _ = new_size;
+        _ = buf_align;
+        _ = allocator;
 
         //Get ptr
         var ptr = @as([*]u8, @ptrCast(buf_unaligned));
 
         //Go back to our ID
         ptr -= @sizeOf(t.SceUID);
-        var id = @as(*c_int, @ptrCast(@alignCast(4, ptr))).*;
+        var id = @as(*align(4) c_int, @ptrCast(@alignCast(ptr))).*;
 
         //Free the ID
-        var s = sceKernelFreePartitionMemory(id);
+        var s = sysmem.sceKernelFreePartitionMemory(id);
+        _ = s;
 
         //Return 0
         return 0;

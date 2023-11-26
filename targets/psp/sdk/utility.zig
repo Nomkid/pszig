@@ -131,7 +131,7 @@ pub extern fn sceUtilityNetconfShutdownStart() c_int;
 pub extern fn sceUtilityNetconfUpdate(unknown: c_int) c_int;
 pub extern fn sceUtilityNetconfGetStatus() c_int;
 const NetData = extern union {
-    asUint: u32_7,
+    asUint: u32, // TODO: what was u32_7?
     asString: [128]u8,
 };
 

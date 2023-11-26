@@ -126,7 +126,7 @@ pub fn write(self: *PBP, out_writer: anytype, allocator: mem.Allocator) !void {
                 file.offset = offset;
             },
             .buildtime_path => {
-                var fi = try fs.cwd().openFile(file.data.path.lazy.getPath(file.data.path.b), .{});
+                var fi = try fs.cwd().openFile(file.data.buildtime_path.lazy.getPath(file.data.buildtime_path.b), .{});
                 defer fi.close();
                 var reader = io.bufferedReader(fi.reader());
                 var buf: [1]u8 = undefined;
@@ -166,16 +166,16 @@ pub fn addFile(self: *PBP, name: FileName, file: File) void {
     }
 }
 
-pub fn getFile(self: *PBP, name: FileName) ?File {
+pub fn getFile(self: *PBP, name: FileName) ?*File {
     return switch (name) {
-        .param_sfo => self.param_sfo,
-        .icon0_png => self.icon0_png,
-        .icon1_pmf => self.icon1_pmf,
-        .pic0_png => self.pic0_png,
-        .pic1_png => self.pic1_png,
-        .snd0_at3 => self.snd0_at3,
-        .data_psp => self.data_psp,
-        .data_psar => self.data_psar,
+        .param_sfo => if (self.param_sfo != null) &self.param_sfo.? else null,
+        .icon0_png => if (self.icon0_png != null) &self.icon0_png.? else null,
+        .icon1_pmf => if (self.icon1_pmf != null) &self.icon1_pmf.? else null,
+        .pic0_png => if (self.pic0_png != null) &self.pic0_png.? else null,
+        .pic1_png => if (self.pic1_png != null) &self.pic1_png.? else null,
+        .snd0_at3 => if (self.snd0_at3 != null) &self.snd0_at3.? else null,
+        .data_psp => if (self.data_psp != null) &self.data_psp.? else null,
+        .data_psar => if (self.data_psar != null) &self.data_psar.? else null,
     };
 }
 

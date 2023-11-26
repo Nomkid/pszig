@@ -60,15 +60,9 @@ pub fn build(b: *Build, options: Options, sfo_options: SFOOptions) !void {
     var param_sfo_buf = try param_sfo_bytes.toOwnedSlice();
 
     const eboot_step = PBP.MakePBP.create(b, .{ .name = "EBOOT.PBP" });
-    var param_sfo_file = try b.allocator.create(PBP.FileList.File);
-    var icon0_png_file = try b.allocator.create(PBP.FileList.File);
-    var data_psp_file = try b.allocator.create(PBP.FileList.File);
-    param_sfo_file.* = .{ .data = .{ .buf = param_sfo_buf } };
-    icon0_png_file.* = .{ .data = .{ .path = .{ .lazy = .{ .path = "test/PKGI/EBOOT/ICON0.PNG" }, .b = b } } };
-    data_psp_file.* = .{ .data = .{ .path = .{ .lazy = exe.getEmittedBin(), .b = b } } };
-    eboot_step.pbp.addFile(.param_sfo, param_sfo_file);
-    eboot_step.pbp.addFile(.icon0_png, icon0_png_file);
-    eboot_step.pbp.addFile(.data_psp, data_psp_file);
+    eboot_step.pbp.addFile(.param_sfo, .{ .data = .{ .buf = param_sfo_buf } });
+    eboot_step.pbp.addFile(.icon0_png, .{ .data = .{ .buildtime_path = .{ .lazy = .{ .path = "test/PKGI/EBOOT/ICON0.PNG" }, .b = b } } });
+    eboot_step.pbp.addFile(.data_psp, .{ .data = .{ .buildtime_path = .{ .lazy = exe.getEmittedBin(), .b = b } } });
     eboot_step.step.dependOn(&exe.step);
     b.getInstallStep().dependOn(&eboot_step.step);
 }

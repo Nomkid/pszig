@@ -39,7 +39,7 @@ pub fn analyze(argerator: *std.process.ArgIterator, allocator: mem.Allocator) !v
         var parsed = try sfo.loadFile(file, allocator);
         defer parsed.deinit();
 
-        for (parsed.entries.items) |item| switch (item.data_format) {
+        for (parsed.entries.items) |item| switch (item.data) {
             .utf8 => std.log.info("{s} = {s}", .{ item.key, item.data.utf8 }),
             .utf8s => std.log.info("{s} = {s}", .{ item.key, item.data.utf8s }),
             .int32 => std.log.info("{s} = {d}", .{ item.key, item.data.int32 }),

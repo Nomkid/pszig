@@ -54,7 +54,6 @@ pub fn loadFile(in_file: fs.File, allocator: mem.Allocator) !SFO {
 
         try entries.append(.{
             .key = @ptrCast(try key.toOwnedSlice()),
-            .data_format = data_fmt,
             .data = data,
         });
     }
@@ -69,7 +68,7 @@ pub fn init(allocator: mem.Allocator) SFO {
 pub fn deinit(self: *SFO) void {
     for (self.entries.items) |item| {
         self.entries.allocator.free(@as([]u8, @constCast(@ptrCast(item.key))));
-        switch (item.data_format) {
+        switch (item.data) {
             .utf8s => self.entries.allocator.free(item.data.utf8s),
             .utf8 => self.entries.allocator.free(@as([]u8, @constCast(@ptrCast(item.data.utf8)))),
             .int32 => {},
@@ -84,7 +83,11 @@ pub fn write(self: *SFO, out_writer: anytype, allocator: mem.Allocator) !void {
     for (self.entries.items) |entry|
         try index_list.append(.{
             .key_offset = undefined,
-            .data_fmt = entry.data_format,
+            .data_fmt = switch (entry.data) {
+                .utf8s => .utf8s,
+                .utf8 => .utf8,
+                .int32 => .int32,
+            },
             .data_len = undefined,
             .data_max_len = undefined,
             .data_offset = undefined,
@@ -97,7 +100,7 @@ pub fn write(self: *SFO, out_writer: anytype, allocator: mem.Allocator) !void {
     var data_total_len: u32 = 0;
     for (self.entries.items, 0..) |entry, idx| {
         index_list.items[idx].data_offset = data_total_len;
-        const max_len: u32 = switch (entry.data_format) {
+        const max_len: u32 = switch (entry.data) {
             .utf8 => @intCast(entry.data.utf8.len),
             .utf8s => @intCast(entry.data.utf8s.len),
             .int32 => 4,
@@ -118,7 +121,7 @@ pub fn write(self: *SFO, out_writer: anytype, allocator: mem.Allocator) !void {
             try writer.writeAll(item.key);
         padding = bytes.items.len % 4;
         try writer.writeByteNTimes(0, padding);
-        for (self.entries.items) |item| switch (item.data_format) {
+        for (self.entries.items) |item| switch (item.data) {
             .utf8 => try writer.writeAll(item.data.utf8),
             .utf8s => try writer.writeAll(item.data.utf8s),
             .int32 => try writer.writeInt(u32, item.data.int32, .little),
@@ -146,10 +149,23 @@ pub fn writeFile(self: *SFO, out_file: fs.File, allocator: mem.Allocator) !void 
     try self.write(out_file.writer(), allocator);
 }
 
+pub fn addEntryString(self: *SFO, key: []const u8, data: []const u8, allocator: mem.Allocator) !void {
+    var key_sentinel = try allocator.dupeZ(u8, key);
+    var data_sentinel = try allocator.dupeZ(u8, data);
+    try self.entries.append(.{
+        .key = key_sentinel,
+        .data = .{ .utf8 = data_sentinel },
+    });
+}
+pub fn addEntryInt(self: *SFO, key: []const u8, data: u32, allocator: mem.Allocator) !void {
+    var key_sentinel = try allocator.dupeZ(u8, key);
+    try self.entries.append(.{ .key = key_sentinel, .data = .{ .int32 = data } });
+}
+
 pub const EntryList = std.ArrayList(Entry);
 pub const Entry = struct {
     key: Key,
-    data_format: DataFormat,
+    // data_format: DataFormat,
     data: Data,
 
     pub const Key = [:0]const u8;
@@ -162,6 +178,46 @@ pub const Entry = struct {
         utf8s: []const u8,
         utf8: [:0]const u8,
         int32: u32,
+    };
+};
+pub const DefaultEntries = struct {
+    pub const PSP = [_]Entry{
+        Entry{
+            .key = "MEMSIZE",
+            .data = .{ .int32 = 1 },
+        },
+        Entry{
+            .key = "BOOTABLE",
+            .data = .{ .int32 = 1 },
+        },
+        Entry{
+            .key = "CATEGORY",
+            .data = .{ .utf8 = "MG" },
+        },
+        Entry{
+            .key = "DISC_ID",
+            .data = .{ .utf8 = "" },
+        },
+        Entry{
+            .key = "DISC_VERSION",
+            .data = .{ .utf8 = "1.00" },
+        },
+        Entry{
+            .key = "PARENTAL_LEVEL",
+            .data = .{ .int32 = 1 },
+        },
+        Entry{
+            .key = "PSP_SYSTEM_VER",
+            .data = .{ .utf8 = "1.00" },
+        },
+        Entry{
+            .key = "REGION",
+            .data = .{ .int32 = 32768 },
+        },
+        Entry{
+            .key = "TITLE",
+            .data = .{ .utf8 = "Blank" },
+        },
     };
 };
 

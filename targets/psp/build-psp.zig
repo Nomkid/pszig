@@ -52,15 +52,15 @@ pub fn build(b: *Build, options: Options, sfo_options: SFOOptions) !void {
 
     var param_sfo = SFO.init(b.allocator);
     defer param_sfo.deinit();
-    try param_sfo.entries.append(.{ .key = "MEMSIZE", .data_format = .int32, .data = .{ .int32 = sfo_options.memsize } });
-    try param_sfo.entries.append(.{ .key = "BOOTABLE", .data_format = .int32, .data = .{ .int32 = 1 } });
-    try param_sfo.entries.append(.{ .key = "CATEGORY", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.category) } });
-    try param_sfo.entries.append(.{ .key = "DISC_ID", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.disc_id) } });
-    try param_sfo.entries.append(.{ .key = "DISC_VERSION", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.disc_version) } });
-    try param_sfo.entries.append(.{ .key = "PARENTAL_LEVEL", .data_format = .int32, .data = .{ .int32 = sfo_options.parental_level } });
-    try param_sfo.entries.append(.{ .key = "PSP_SYSTEM_VER", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.psp_system_ver) } });
-    try param_sfo.entries.append(.{ .key = "REGION", .data_format = .int32, .data = .{ .int32 = sfo_options.region } });
-    try param_sfo.entries.append(.{ .key = "TITLE", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.title) } });
+    try param_sfo.addEntryInt("MEMSIZE", sfo_options.memsize, b.allocator);
+    try param_sfo.addEntryInt("BOOTABLE", 1, b.allocator);
+    try param_sfo.addEntryString("CATEGORY", sfo_options.category, b.allocator);
+    try param_sfo.addEntryString("DISC_ID", sfo_options.disc_id, b.allocator);
+    try param_sfo.addEntryString("DISC_VERSION", sfo_options.disc_version, b.allocator);
+    try param_sfo.addEntryInt("PARENTAL_LEVEL", 1, b.allocator);
+    try param_sfo.addEntryString("PSP_SYSTEM_VER", sfo_options.psp_system_ver, b.allocator);
+    try param_sfo.addEntryInt("REGION", 32768, b.allocator);
+    try param_sfo.addEntryString("TITLE", sfo_options.title, b.allocator);
 
     var param_sfo_bytes = std.ArrayList(u8).init(b.allocator);
     errdefer param_sfo_bytes.deinit();

@@ -225,6 +225,18 @@ pub const MakePBP = struct {
         const b = step.owner;
         const self = @fieldParentPtr(MakePBP, "step", step);
 
+        const names = [_]FileName{ .param_sfo, .icon0_png, .icon1_pmf, .pic0_png, .pic1_png, .snd0_at3, .data_psp, .data_psar };
+        for (names) |name| if (self.pbp.getFile(name)) |file| switch (file.data) {
+            .buf => continue,
+            .buildtime_path => {
+                var in_file = try fs.openFileAbsolute(file.data.buildtime_path.lazy.getPath(file.data.buildtime_path.b), .{});
+                defer in_file.close();
+                var buf = try in_file.readToEndAlloc(b.allocator, 1024 * 1024 * 1024);
+                file.data = .{ .buf = buf };
+            },
+            .packed_path => return error.TODO,
+        };
+
         var out_path = [_][]const u8{ b.install_path, self.name };
         var out_file = try fs.createFileAbsolute(try fs.path.join(b.allocator, &out_path), .{});
         defer out_file.close();

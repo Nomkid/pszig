@@ -68,10 +68,10 @@ pub fn init(allocator: mem.Allocator) SFO {
 
 pub fn deinit(self: *SFO) void {
     for (self.entries.items) |item| {
-        self.entries.allocator.free(@as([]u8, @ptrCast(item.key)));
+        self.entries.allocator.free(@as([]u8, @constCast(@ptrCast(item.key))));
         switch (item.data_format) {
             .utf8s => self.entries.allocator.free(item.data.utf8s),
-            .utf8 => self.entries.allocator.free(@as([]u8, @ptrCast(item.data.utf8))),
+            .utf8 => self.entries.allocator.free(@as([]u8, @constCast(@ptrCast(item.data.utf8)))),
             .int32 => {},
         }
     }
@@ -152,15 +152,15 @@ pub const Entry = struct {
     data_format: DataFormat,
     data: Data,
 
-    pub const Key = [:0]u8;
+    pub const Key = [:0]const u8;
     pub const DataFormat = enum(u16) {
         utf8s = 0x0004,
         utf8 = 0x0204,
         int32 = 0x0404,
     };
     pub const Data = union(DataFormat) {
-        utf8s: []u8,
-        utf8: [:0]u8,
+        utf8s: []const u8,
+        utf8: [:0]const u8,
         int32: u32,
     };
 };
@@ -192,7 +192,6 @@ pub const MakeSFO = struct {
     title: []const u8,
     disc_id: []const u8,
     disc_version: []const u8,
-    version: []const u8,
     psp_system_ver: []const u8,
     category: []const u8,
     parental_level: u32,
@@ -203,7 +202,6 @@ pub const MakeSFO = struct {
         title: []const u8,
         disc_id: []const u8,
         disc_version: []const u8 = "1.00",
-        version: []const u8 = "1.00",
         psp_system_ver: []const u8 = "1.00",
         category: []const u8 = "MG",
         parental_level: u32 = 1,

@@ -25,7 +25,6 @@ pub const SFOOptions = struct {
     title: []const u8,
     disc_id: []const u8,
     disc_version: []const u8 = "1.00",
-    version: []const u8 = "1.00",
     psp_system_ver: []const u8 = "1.00",
     category: []const u8 = "MG",
     parental_level: u32 = 1,
@@ -34,7 +33,6 @@ pub const SFOOptions = struct {
 };
 
 pub fn build(b: *Build, options: Options, sfo_options: SFOOptions) !void {
-    _ = sfo_options;
     var cpu_features = Cpu.Feature.Set.empty;
     cpu_features.addFeature(@intFromEnum(mips.Feature.single_float));
     const target = std.zig.CrossTarget{
@@ -54,6 +52,16 @@ pub fn build(b: *Build, options: Options, sfo_options: SFOOptions) !void {
 
     var param_sfo = SFO.init(b.allocator);
     defer param_sfo.deinit();
+    try param_sfo.entries.append(.{ .key = "MEMSIZE", .data_format = .int32, .data = .{ .int32 = sfo_options.memsize } });
+    try param_sfo.entries.append(.{ .key = "BOOTABLE", .data_format = .int32, .data = .{ .int32 = 1 } });
+    try param_sfo.entries.append(.{ .key = "CATEGORY", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.category) } });
+    try param_sfo.entries.append(.{ .key = "DISC_ID", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.disc_id) } });
+    try param_sfo.entries.append(.{ .key = "DISC_VERSION", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.disc_version) } });
+    try param_sfo.entries.append(.{ .key = "PARENTAL_LEVEL", .data_format = .int32, .data = .{ .int32 = sfo_options.parental_level } });
+    try param_sfo.entries.append(.{ .key = "PSP_SYSTEM_VER", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.psp_system_ver) } });
+    try param_sfo.entries.append(.{ .key = "REGION", .data_format = .int32, .data = .{ .int32 = sfo_options.region } });
+    try param_sfo.entries.append(.{ .key = "TITLE", .data_format = .utf8, .data = .{ .utf8 = @ptrCast(sfo_options.title) } });
+
     var param_sfo_bytes = std.ArrayList(u8).init(b.allocator);
     errdefer param_sfo_bytes.deinit();
     try param_sfo.write(param_sfo_bytes.writer(), b.allocator);

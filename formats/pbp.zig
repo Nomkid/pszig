@@ -226,7 +226,7 @@ pub const MakePBP = struct {
         const self = @fieldParentPtr(MakePBP, "step", step);
 
         var out_path = [_][]const u8{ b.install_path, self.name };
-        var out_file = try fs.openFileAbsolute(try fs.path.join(b.allocator, &out_path), .{});
+        var out_file = try fs.createFileAbsolute(try fs.path.join(b.allocator, &out_path), .{});
         defer out_file.close();
 
         try self.pbp.write(out_file.writer(), b.allocator);
